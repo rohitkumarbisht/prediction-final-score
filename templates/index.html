@@ -2,6 +2,18 @@
 <html>
 <head>
     <title>CSV Upload, Model Training, and Prediction</title>
+    <style>
+        input[type="number"] {
+            width: 70px; /* Adjust the width as needed */
+        }
+    </style>
+     <script>
+        function updateAgeValue() {
+            var ageSlider = document.getElementById("age");
+            var ageValue = document.getElementById("ageValue");
+            ageValue.innerHTML = ageSlider.value;
+        }
+    </script>
 </head>
 <body>
     <h1>Upload CSV File</h1>
@@ -11,23 +23,43 @@
     </form>
     
     {% if file_uploaded %}
+    <h2>Correlation Analysis</h2>
+    {% if corr_more_than_0_2 or corr_less_than_minus_0_2 %}
+    <h3>Columns having correlation with G3:</h3>
+    <p>
+        {% for col in corr_more_than_0_2 %}
+        {{ col }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+        {% for col in corr_less_than_minus_0_2 %}
+        {{ col }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+
+    {% if corr_minus_0_2_to_0_2 %}
+    <h3>Columns with no/low correlation:</h3>
+    <p>
+        {% for col in corr_minus_0_2_to_0_2 %}
+        {{ col }}{% if not loop.last %}, {% endif %}
+        {% endfor %}
+    </p>
+    {% endif %}
+    {% endif %}
+    
+    {% if file_uploaded %}
+    <h2>Model Training and Prediction</h2>
     <form action="/train" method="post">
         <input type="submit" value="Train Model" name="train_button">
     </form>
     {% endif %}
-    
+
     {% if model_trained %}
-    <h2>Model Trained</h2>
-    <form action="/start_prediction" method="post">
-        <input type="submit" value="Start Prediction" name="start_prediction_button">
-    </form>
-    {% endif %}
-    
-    {% if prediction_started %}
+    <h2>Model Trained Successfully!</h2>
     <h2>Predict Student Pass/Fail</h2>
     <form action="/predict" method="post">
         <label for="age">Age:</label>
-        <input type="range" id="age" name="age" min="15" max="22">
+        <input type="range" id="age" name="age" min="15" max="22" value="15" oninput="updateAgeValue()">
+        <span id="ageValue">15</span>
         <br>
         <label for="failures">Past Failures:</label>
         <select id="failures" name="failures">
@@ -41,26 +73,26 @@
         <label for="medu">Mother’s education:</label>
         <select id="medu" name="medu">
             <option value="0">None</option>
-            <option value="1">Primary Education</option>
-            <option value="2">5th to 9th Grade</option>
-            <option value="3">Secondary Education</option>
-            <option value="4">Higher Education</option>
+            <option value="1">Primary Education (4th grade) [1]</option>
+            <option value="2">5th to 9th Grade [2]</option>
+            <option value="3">Secondary Education [3]</option>
+            <option value="4">Higher Education [4]</option>
         </select>
         <br>
         <label for="fedu">Father’s education:</label>
         <select id="fedu" name="fedu">
             <option value="0">None</option>
-            <option value="1">Primary Education</option>
-            <option value="2">5th to 9th Grade</option>
-            <option value="3">Secondary Education</option>
-            <option value="4">Higher Education</option>
+            <option value="1">Primary Education (4th grade) [1]</option>
+            <option value="2">5th to 9th Grade [2]</option>
+            <option value="3">Secondary Education [3]</option>
+            <option value="4">Higher Education [4]</option>
         </select>
         <br>
         <label for="g1">G1 score:</label>
-        <input type="number" id="g1" name="g1" min="0" max="20">
+        <input type="number" id="g1" name="g1" min="0" max="20" placeholder="out of 20" size="20">
         <br>
         <label for="g2">G2 score:</label>
-        <input type="number" id="g2" name="g2" min="0" max="20">
+        <input type="number" id="g2" name="g2" min="0" max="20" placeholder="out of 20">
         <br>
         <input type="submit" value="Predict">
     </form>
