@@ -71,7 +71,7 @@ def predict():
     prediction = model.predict(input_data)
     result = "Pass" if prediction[0] == 1 else "Fail"
 
-    return f"The student is predicted to {result}"
+    return render_template('index.html', prediction_result=result, file_uploaded=False, model_trained=False)
 
 if __name__ == '__main__':
     app.run(debug=True)

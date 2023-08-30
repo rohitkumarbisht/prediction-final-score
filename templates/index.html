@@ -11,11 +11,18 @@
             var ageValue = document.getElementById("ageValue");
             ageValue.innerHTML = ageSlider.value;
         }
+        function redirectToHomepage() {
+            var predictionResult = document.getElementById("predictionResult");
+            if (predictionResult) {
+                predictionResult.innerHTML = "";
+            }
+            window.location.href = "/"; // Change "/route" to the actual route you want to redirect to
+        }
     </script>
 </head>
 <body>
 
-    {% if not file_uploaded and not model_trained %}
+    {% if not file_uploaded and not model_trained and not prediction_result %}
         <h1>Upload csv file for training</h1>
         <form action="/" method="post" enctype="multipart/form-data">
             <label for="file">Select a csv file for training:</label>
@@ -50,7 +57,14 @@
             {% if corr_more_than_0_2 %}
             {% endif %}
     {% endif %}
-
+    
+    {% if prediction_result %}
+    <div id="predictionResult">
+        <h3>Prediction Result: {{ prediction_result }}</h3>
+        <button onclick="redirectToHomepage()">Ok</button>
+    </div>
+    {% endif %}
+   
     {% if file_uploaded and model_trained %}
         <h2>Model Trained Successfully!</h2>
         <h3 style="text-align: center">Predict Student Pass/Fail</h3>
