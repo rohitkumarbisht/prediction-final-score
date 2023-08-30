@@ -12,11 +12,8 @@
             ageValue.innerHTML = ageSlider.value;
         }
         function redirectToHomepage() {
-            var predictionResult = document.getElementById("predictionResult");
-            if (predictionResult) {
-                predictionResult.innerHTML = "";
-            }
-            window.location.href = "/"; // Change "/route" to the actual route you want to redirect to
+            window.location.href = "/";
+            console.log("hello")
         }
     </script>
 </head>
@@ -60,8 +57,11 @@
     
     {% if prediction_result %}
     <div id="predictionResult">
+        <div style="display: flex; justify-content: space-around;">
         <h3>Prediction Result: {{ prediction_result }}</h3>
-        <button onclick="redirectToHomepage()">Ok</button>
+        <button onclick="redirectToHomepage()">Back to Homepage</button>
+        </div>
+        <iframe id="Iframe" src="https://en.wikipedia.org/wiki/Main_Page" width="100%" height="600px"></iframe>
     </div>
     {% endif %}
    
