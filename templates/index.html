@@ -23,7 +23,7 @@
         <h1>Upload csv file for training</h1>
         <form action="/" method="post" enctype="multipart/form-data">
             <label for="file">Select a csv file for training:</label>
-            <input placeholder="Upload" type="file" name="file" accept=".csv">
+            <input placeholder="Upload" type="file" name="csv_file" accept=".csv">
             <input type="submit" value="Upload">
         </form>
     {% endif %}
@@ -31,7 +31,7 @@
     {% if file_uploaded %}
         <h2>Correlation Analysis</h2>
             {% if corr_more_than_0_2 or corr_less_than_minus_0_2 %}
-                <h3>Columns having correlation with G3:</h3>
+                <h3>Columns having correlation with Target Column:</h3>
                 <p>
                     {% for col in corr_more_than_0_2 %}
                     {{ col }}{% if not loop.last %}, {% endif %}
@@ -43,7 +43,7 @@
             {% endif %}
 
             {% if corr_minus_0_2_to_0_2 %}
-                <h3>Columns with no/low correlation:</h3>
+                <h3>Columns with no/low correlation with Target Column:</h3>
                 <p>
                     {% for col in corr_minus_0_2_to_0_2 %}
                     {{ col }}{% if not loop.last %}, {% endif %}
@@ -58,7 +58,7 @@
     {% if prediction_result %}
     <div id="predictionResult">
         <div style="display: flex; justify-content: space-around;">
-        <h3>Prediction Result: {{ prediction_result }}</h3>
+        <h3>Predicted Final Score: {{ prediction_result }}</h3>
         <button onclick="redirectToHomepage()">Back to Homepage</button>
         </div>
         <iframe id="Iframe" src="https://en.wikipedia.org/wiki/Main_Page" width="100%" height="600px"></iframe>
@@ -66,48 +66,17 @@
     {% endif %}
    
     {% if file_uploaded and model_trained %}
-        <h2>Model Trained Successfully!</h2>
-        <h3 style="text-align: center">Predict Student Pass/Fail</h3>
-        <form action="/predict" method="post">
-            <label for="age">Age:</label>
-            <input type="range" id="age" name="age" min="15" max="22" value="15" oninput="updateAgeValue()">
-            <span id="ageValue">15</span>
-            <br>
-            <label for="failures">Past Failures:</label>
-            <select id="failures" name="failures">
-                <option value="0">0</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4 or more</option>
-            </select>
-            <br>
-            <label for="medu">Mother’s education:</label>
-            <select id="medu" name="medu">
-                <option value="0">None</option>
-                <option value="1">Primary Education (4th grade) [1]</option>
-                <option value="2">5th to 9th Grade [2]</option>
-                <option value="3">Secondary Education [3]</option>
-                <option value="4">Higher Education [4]</option>
-            </select>
-            <br>
-            <label for="fedu">Father’s education:</label>
-            <select id="fedu" name="fedu">
-                <option value="0">None</option>
-                <option value="1">Primary Education (4th grade) [1]</option>
-                <option value="2">5th to 9th Grade [2]</option>
-                <option value="3">Secondary Education [3]</option>
-                <option value="4">Higher Education [4]</option>
-            </select>
-            <br>
-            <label for="g1">G1 score:</label>
-            <input type="number" id="g1" name="g1" min="0" max="20" placeholder="out of 20" size="20">
-            <br>
-            <label for="g2">G2 score:</label>
-            <input type="number" id="g2" name="g2" min="0" max="20" placeholder="out of 20">
-            <br>
-            <input type="submit" value="Predict">
-        </form>
+    <h2>Model Trained Successfully!</h2>
+    <h3 style="text-align: center">Predict Student Pass/Fail</h3>
+    <form action="/predict" method="post">
+        <input type="hidden" name="features" value="{{ selected_features|join(',') }}">
+        {% for feature in selected_features %}
+        <label for="{{ feature }}">{{ feature }}:</label>
+        <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" size="20">
+        <br>
+        {% endfor %}
+        <input type="submit" value="View Prediction Report">
+    </form>
     {% endif %}
 </body>
 </html>
