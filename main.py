@@ -1,6 +1,7 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+import os
 
 app = Flask(__name__)
 
@@ -58,23 +59,55 @@ def index():
                                    corr_minus_0_2_to_0_2=correlation_minus_0_2_to_0_2)
     return render_template('index.html', file_uploaded=False, model_trained=model_trained)
 
-
 @app.route('/predict', methods=['POST'])
-def predict():
+def predict_and_update_csv():
     if not model_trained:
         return render_template('index.html', file_uploaded=True, model_trained=False)
 
     # Get form inputs and prepare input data
     selected_features = request.form.get('features').split(',')
-    print(selected_features)
-    input_data = []
+    input_values = {}
     for feature in selected_features:
-        input_data.append(float(request.form[feature]))  # Convert to float for regression
+        input_values[feature] = request.form[feature]  # Capture input values
 
-    # Make prediction
-    prediction = model.predict([input_data])[0]
+    try:
+        # Load the existing CSV
+        df = pd.read_csv('uploaded.csv')
 
-    return render_template('index.html', prediction_result=prediction, file_uploaded=True, model_trained=model_trained, selected_features=selected_features)
+        # Create a new row with the input values
+        new_row = {}
+        for feature, value in input_values.items():
+            new_row[feature] = [float(value)]  # Convert to float for consistency
+
+        # Make prediction
+        input_data = [float(input_values[feature]) for feature in selected_features]
+        prediction = model.predict([input_data])[0]
+        
+        # Create a DataFrame from the new row
+        new_df = pd.DataFrame(new_row)
+
+        last_row_index = new_df.index[-1]
+        # Update the last row's last column with the predicted value
+        new_df.at[last_row_index, df.columns[-1]] = prediction
+
+        # Concatenate the new row with the existing DataFrame
+        updated_df = pd.concat([df, new_df], ignore_index=True)
+
+        # Save the updated DataFrame to the CSV file
+        updated_df.to_csv('uploaded.csv', index=False)
+
+        return render_template('index.html', prediction_result=prediction, file_uploaded=True, model_trained=model_trained, selected_features=selected_features)
+
+    except Exception as e:
+        print('Error updating CSV or making prediction:', str(e))
+        return "Error updating CSV or making prediction", 500
+
+@app.route('/download', methods=['GET'])
+def download_csv():
+    if os.path.exists('uploaded.csv'):
+        return send_file('uploaded.csv', as_attachment=True)
+    else:
+        return "CSV file not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True)
