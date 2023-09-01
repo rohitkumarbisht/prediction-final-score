@@ -28,7 +28,7 @@
         </form>
     {% endif %}
 
-    {% if file_uploaded %}
+    {% if file_uploaded and not prediction_result %}
         <h2>Correlation Analysis</h2>
             {% if corr_more_than_0_2 or corr_less_than_minus_0_2 %}
                 <h3>Columns having correlation with Target Column:</h3>
@@ -65,7 +65,7 @@
     </div>
     {% endif %}
    
-    {% if file_uploaded and model_trained %}
+    {% if file_uploaded and model_trained and not prediction_result %}
     <h2>Model Trained Successfully!</h2>
     <h3 style="text-align: center">Predict Student Pass/Fail</h3>
     <form action="/predict" method="post">
