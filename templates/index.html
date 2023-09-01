@@ -23,7 +23,7 @@
         <h1>Upload csv file for training</h1>
         <form action="/" method="post" enctype="multipart/form-data">
             <label for="file">Select a csv file for training:</label>
-            <input placeholder="Upload" type="file" name="file" accept=".csv">
+            <input placeholder="Upload" type="file" name="csv_file" accept=".csv">
             <input type="submit" value="Upload">
         </form>
     {% endif %}
@@ -58,7 +58,7 @@
     {% if prediction_result %}
     <div id="predictionResult">
         <div style="display: flex; justify-content: space-around;">
-        <h3>Prediction Result: {{ prediction_result }}</h3>
+        <h3>Predicted Final Score: {{ prediction_result }}</h3>
         <button onclick="redirectToHomepage()">Back to Homepage</button>
         </div>
         <iframe id="Iframe" src="https://en.wikipedia.org/wiki/Main_Page" width="100%" height="600px"></iframe>
@@ -69,10 +69,10 @@
     <h2>Model Trained Successfully!</h2>
     <h3 style="text-align: center">Predict Student Pass/Fail</h3>
     <form action="/predict" method="post">
-        <input type="hidden" name="features" value="{% for feature in selected_features %}{{ feature }}{% if not loop.last %},{% endif %}{% endfor %}">
+        <input type="hidden" name="features" value="{{ selected_features|join(',') }}">
         {% for feature in selected_features %}
         <label for="{{ feature }}">{{ feature }}:</label>
-        <input type="number" id="{{ feature }}" name="{{ feature }}" min="0" max="20" placeholder="" size="20">
+        <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" size="20">
         <br>
         {% endfor %}
         <input type="submit" value="View Prediction Report">

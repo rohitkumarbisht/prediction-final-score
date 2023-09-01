@@ -1,11 +1,12 @@
 from flask import Flask, render_template, request
 import pandas as pd
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.linear_model import LinearRegression
 
 app = Flask(__name__)
 
 model = None
 model_trained = False
+
 
 def perform_correlation_analysis(df, target_column):
     # Exclude the target column from the features
@@ -35,7 +36,7 @@ def perform_correlation_analysis(df, target_column):
 def index():
     global model, model_trained
     if request.method == 'POST':
-        uploaded_file = request.files['file']
+        uploaded_file = request.files['csv_file']
         if uploaded_file and uploaded_file.filename.endswith('.csv'):
             uploaded_file.save('uploaded.csv')
             model_trained = False
@@ -46,11 +47,11 @@ def index():
 
             selected_features = correlation_more_than_0_2 + correlation_less_than_minus_0_2 # Use highly correlated features for the form
 
-            model = GradientBoostingClassifier()
-            model.fit(df[selected_features], (df[target_column] >= 10).astype(int))
+            if selected_features:
+                model = LinearRegression()
+                model.fit(df[selected_features], df[target_column])
 
-            model_trained = True
-
+                model_trained = True
             return render_template('index.html', file_uploaded=True, model_trained=model_trained,
                                    selected_features=selected_features , corr_more_than_0_2=correlation_more_than_0_2,
                                    corr_less_than_minus_0_2=correlation_less_than_minus_0_2,
@@ -64,16 +65,16 @@ def predict():
         return render_template('index.html', file_uploaded=True, model_trained=False)
 
     # Get form inputs and prepare input data
-    selected_features = request.form.getlist('features')
+    selected_features = request.form.get('features').split(',')
+    print(selected_features)
     input_data = []
     for feature in selected_features:
-        input_data.append(int(request.form[feature]))
+        input_data.append(float(request.form[feature]))  # Convert to float for regression
 
     # Make prediction
-    prediction = model.predict([input_data])
-    result = "Pass" if prediction[0] == 1 else "Fail"
+    prediction = model.predict([input_data])[0]
 
-    return render_template('index.html', prediction_result=result, file_uploaded=True, model_trained=model_trained, selected_features=selected_features)
+    return render_template('index.html', prediction_result=prediction, file_uploaded=True, model_trained=model_trained, selected_features=selected_features)
 
 if __name__ == '__main__':
     app.run(debug=True)
