@@ -2,11 +2,45 @@ from flask import Flask, render_template, request, send_file
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 import os
+import psycopg2
 
 app = Flask(__name__)
 
 model = None
 model_trained = False
+
+# Function to fetch data from the PostgreSQL table
+def fetch_data_from_postgresql(database_name, schema_name,table_name):
+    global df
+    try:
+        #connect with the PostgreSQL Server
+        conn = psycopg2.connect(
+            host='airbyte.cqqg4q5hnscs.ap-south-1.rds.amazonaws.com',
+            port='5432',
+            user='airbyte',
+            password='F648d&lTHltriVidRa0R',
+            database=database_name
+        )
+        cursor = conn.cursor()
+        
+        # Fetch all data from the table
+        cursor.execute(f'SELECT * FROM {database_name}.{schema_name}."STUDENT_DATA"')
+        data = cursor.fetchall()
+        
+        # Get column names from the table
+        cursor.execute(f'SELECT column_name FROM information_schema.columns WHERE table_schema = %s AND table_name = %s', (schema_name, table_name,))
+        columns = [col[0] for col in cursor.fetchall()]
+        
+        df = pd.DataFrame(data, columns=columns)
+        
+        cursor.close()
+        conn.close()
+        
+        return df
+
+    except Exception as e:
+        print(f"Error fetching data from PostgreSQL: {str(e)}")
+        return None
 
 
 def perform_correlation_analysis(df, target_column):
@@ -37,12 +71,14 @@ def perform_correlation_analysis(df, target_column):
 def index():
     global model, model_trained
     if request.method == 'POST':
-        uploaded_file = request.files['csv_file']
-        if uploaded_file and uploaded_file.filename.endswith('.csv'):
-            uploaded_file.save('uploaded.csv')
-            model_trained = False
+        # Fetch data from the PostgreSQL table
+        database_name = 'learninganalytics'
+        schema_name = 'learninganalytics'
+        table_name = "STUDENT_DATA"
+        df = fetch_data_from_postgresql(database_name, schema_name,table_name)
 
-            df = pd.read_csv('uploaded.csv')
+        if df is not None:
+            model_trained = False
             target_column = df.columns[-1]
             correlation_more_than_0_2, correlation_less_than_minus_0_2, correlation_minus_0_2_to_0_2 = perform_correlation_analysis(df, target_column)
 
@@ -53,11 +89,10 @@ def index():
                 model.fit(df[selected_features], df[target_column])
 
                 model_trained = True
-            return render_template('index.html', file_uploaded=True, model_trained=model_trained,
+    return render_template('index.html', file_uploaded=True, model_trained=model_trained,
                                    selected_features=selected_features , corr_more_than_0_2=correlation_more_than_0_2,
                                    corr_less_than_minus_0_2=correlation_less_than_minus_0_2,
                                    corr_minus_0_2_to_0_2=correlation_minus_0_2_to_0_2)
-    return render_template('index.html', file_uploaded=False, model_trained=model_trained)
 
 @app.route('/predict', methods=['POST'])
 def predict_and_update_csv():
@@ -71,8 +106,11 @@ def predict_and_update_csv():
         input_values[feature] = request.form[feature]  # Capture input values
 
     try:
-        # Load the existing CSV
-        df = pd.read_csv('uploaded.csv')
+        # Load the db data
+        database_name = 'learninganalytics'
+        schema_name = 'learninganalytics'
+        table_name = "STUDENT_DATA"
+        df = fetch_data_from_postgresql(database_name, schema_name,table_name)
 
         # Create a new row with the input values
         new_row = {}
