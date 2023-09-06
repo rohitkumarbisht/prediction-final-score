@@ -179,12 +179,12 @@ def predict_and_update_csv():
         print('Error updating CSV or making prediction:', str(e))
         return "Error updating CSV or making prediction", 500
 
-@app.route('/download', methods=['GET'])
-def download_csv():
-    if os.path.exists(csv_name):
-        return send_file(csv_name, as_attachment=True)
-    else:
-        return "CSV file not found", 404
+# @app.route('/download', methods=['GET'])
+# def download_csv():
+#     if os.path.exists(csv_name):
+#         return send_file(csv_name, as_attachment=True)
+#     else:
+#         return "CSV file not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True)
