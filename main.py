@@ -78,10 +78,10 @@ def perform_correlation_analysis(df, target_column):
     return correlation_more_than_0_2, correlation_less_than_minus_0_2, correlation_minus_0_2_to_0_2
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
     global model, model_trained,df
-    if request.method == 'POST':
+    if request.method == 'GET':
         # Fetch data from the PostgreSQL table
         df = fetch_data_from_postgresql()
 
