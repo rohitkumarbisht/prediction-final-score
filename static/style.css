@@ -42,7 +42,7 @@ label {
 input[type="number"],
 input[type="range"],
 select {
-    width: 100%;
+    width: 97%;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -67,6 +67,7 @@ input[type="submit"] {
     display: block;
     width: 100%;
     padding: 10px;
+    margin-top: 20px;
     background-color: #007bff;
     color: #fff;
     border: none;
@@ -81,4 +82,9 @@ input[type="submit"]:hover {
 
 .correlation-analysis{
     font-size: 14px;
+}
+#Iframe{
+    height: calc(100vh - 3.8px) !important;
+    width: 100%;
+    border: 0;
 }
