@@ -82,3 +82,8 @@ input[type="submit"]:hover {
 .correlation-analysis{
     font-size: 14px;
 }
+#Iframe{
+    height: calc(100vh - 3.8px) !important;
+    width: 100%;
+    border: 0;
+}
