@@ -35,7 +35,7 @@ def fetch_data_from_postgresql():
         cursor = conn.cursor()
         
         # Fetch all data from the table
-        cursor.execute(f'SELECT * FROM {db_name}.{schema_name}."STUDENT_DATA"')
+        cursor.execute(f'SELECT * FROM {db_name}.{schema_name}."{table_name}"')
         data = cursor.fetchall()
         
         # Get column names from the table
@@ -80,11 +80,12 @@ def perform_correlation_analysis(df, target_column):
 
 @app.route('/', methods=['GET'])
 def index():
-    global model, model_trained,df
+    global model, model_trained,df, insert_data_called
     if request.method == 'GET':
+        insert_data_called = False
         # Fetch data from the PostgreSQL table
-        df = fetch_data_from_postgresql()
-
+        df_raw = fetch_data_from_postgresql()
+        df = df_raw.drop(columns=[df_raw.columns[0]])
         if df is not None:
             model_trained = False
             target_column = df.columns[-1]
@@ -104,6 +105,7 @@ def index():
 
 @app.route('/predict', methods=['POST'])
 def predict_and_update_csv():
+    global insert_data_called
     if not model_trained:
         return render_template(display_page, file_uploaded=True, model_trained=False)
 
@@ -114,13 +116,6 @@ def predict_and_update_csv():
         input_values[feature] = request.form[feature]  # Capture input values
 
     try:
-        # # Load the db data
-        # database_name = 'learninganalytics'
-        # schema_name = 'learninganalytics'
-        # table_name = "STUDENT_DATA"
-        # # df = fetch_data_from_postgresql(database_name, schema_name,table_name)
-        # print(df.head())
-
         # Create a new row with the input values
         new_row = {}
         for feature, value in input_values.items():
@@ -128,6 +123,8 @@ def predict_and_update_csv():
         # Make prediction
         input_data = [float(input_values[feature]) for feature in selected_features]
         prediction = model.predict([input_data])[0]
+        if prediction < 0:
+            prediction = 0
         
         # Create a DataFrame from the new row
         new_df = pd.DataFrame(new_row)
@@ -144,41 +141,44 @@ def predict_and_update_csv():
 
         value_type = (',').join(['%s'] * num_columns)
 
-        insert_query = f"""INSERT INTO {db_name}.{schema_name}."STUDENT_DATA"({columns_required}) VALUES ({value_type})"""
+        insert_query = f"""INSERT INTO {db_name}.{schema_name}."{table_name}"({columns_required}) VALUES ({value_type})"""
         
         value_tuple= ()
         for i in range(num_columns):
             value = new_df.iloc[-1, i]
 
             value_tuple += (value,)
+        if insert_data_called == False:
+            # Call insert_data() only once
+            try:
+                conn = psycopg2.connect(
+                    host=db_host,
+                    port=db_port,
+                    user=db_user,
+                    password=db_password,
+                    database=db_name
+                    )
+                cursor = conn.cursor()
+                cursor.execute(insert_query, value_tuple)
+                conn.commit()
+                cursor.close()
+                conn.close()
+                insert_data_called = True
 
-        try:
-            conn = psycopg2.connect(
-                host=db_host,
-                port=db_port,
-                user=db_user,
-                password=db_password,
-                database=db_name
-                )
-            cursor = conn.cursor()
-            cursor.execute(insert_query, value_tuple)
-            conn.commit()
-            cursor.close()
-            conn.close()
+            except Exception as e:
+                print(f"Error inserting data into PostgreSQL table: {str(e)}")
+                return "Error inserting data into PostgreSQL table", 500
 
-        except Exception as e:
-            print(f"Error inserting data into PostgreSQL table: {str(e)}")
-            return "Error inserting data into PostgreSQL table", 500
 
         # Save the updated DataFrame to the CSV file
         updated_df.to_csv(csv_name, index=False)
 
-        return render_template(display_page, prediction_result=prediction, file_uploaded=True, model_trained=model_trained, selected_features=selected_features)
+        return render_template(display_page, prediction_result=insert_data_called, file_uploaded=True, model_trained=model_trained, selected_features=selected_features)
 
     except Exception as e:
         print('Error updating CSV or making prediction:', str(e))
-        return "Error updating CSV or making prediction", 500
-
+        return "Error updating CSV or making prediction", 500    
+    
 # @app.route('/download', methods=['GET'])
 # def download_csv():
 #     if os.path.exists(csv_name):
