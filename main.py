@@ -148,7 +148,6 @@ def predict_and_update_csv():
             value = new_df.iloc[-1, i]
 
             value_tuple += (value,)
-        print(insert_data_called)
         if insert_data_called == False:
             # Call insert_data() only once
             try:
