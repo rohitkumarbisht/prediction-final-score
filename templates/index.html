@@ -29,7 +29,7 @@
 
 <body>
     {% if file_uploaded and not prediction_result %}
-    <h2>Please enter below required fields for student score prediction</h2>
+    <h3>Please enter below required fields for student score prediction</h3>
     <!-- {% if corr_more_than_0_2 or corr_less_than_minus_0_2 %}
     <div class="correlation-analysis">
         <h3>We have trained model using highly correlated features with target column:</h3>
@@ -71,14 +71,17 @@
     {% endif %}
 
     {% if file_uploaded and model_trained and not prediction_result %}
-    <h3 style="text-align: center">Predict student final exam score</h3>
+    <h4 style="text-align: center">Predict student final exam score</h4>
     <form action="/predict" method="post">
         <input type="hidden" name="features" value="{{ selected_features|join(',') }}">
-        {% for feature in selected_features %}
-        <label for="{{ feature }}">{{ feature }}:</label>
-        <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" size="20">
-        <br>
-        {% endfor %}
+        <div class="form-container">
+            {% for feature in selected_features %}
+                <div class="form-group">
+                    <label for="{{ feature }}" class="feature-label">{{ feature }}:</label>
+                    <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input">
+                </div>
+            {% endfor %}
+        </div>
         <input type="submit" value="View Prediction Report">
     </form>
     {% endif %}
