@@ -12,14 +12,14 @@ h1 {
     margin: 0;
 }
 
-h2 {
+h3 {
     text-align: center;
-    margin-top: 20px;
+    margin-top: 18px;
     color: #007bff;
 }
 
-h3 {
-    margin-top: 15px;
+h4 {
+    margin-top: -7px;
     color: #333;
 }
 
@@ -87,4 +87,23 @@ input[type="submit"]:hover {
     height: calc(100vh - 3.8px) !important;
     width: 100%;
     border: 0;
+}
+
+.form-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+.form-group {
+    flex-basis: calc(50% - 22px); /* Adjust the width as needed */
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+.feature-label {
+    font-size: 12px; /* Adjust the font size as needed */
+}
+.small-input {
+    width: 20% !important; /* Adjust the input box width as needed */
+    padding: 5px !important;
 }
