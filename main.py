@@ -20,6 +20,23 @@ table_name = "STUDENT_DATA"
 
 # Function to fetch data from the PostgreSQL table
 
+fields = [
+    ('Student_ID', 'Student id'), ('No_of_Logins', 'No. of logins'), ('ContentReads',
+                                                                      'Content read'), ('ForumReads', 'Forum read'),
+    ('ForumPosts', 'Forum posts'), ('Quiz_Reviews_before_submission',
+                                    'No. of quiz review before submission'), ('Assignment1_delay', 'Assignment 1 delay'),
+    ('Assignment2_delay', 'Assignment 2 delay'), ('Assignment3_delay',
+                                                  'Assignment 3 delay'), ('Assignment1_submit', 'Assignment 1 submit time'),
+    ('Assignment2_submit', 'Assignment 2 submit time'), ('Assignment3_submit',
+                                                         'Assignment 3 submit time'),
+    ('Average_time_to_submit_assignment',
+     'Average time to submit assignments'), ('Engagement_Level', 'Engagement level'),
+    ('assignment1_score', 'Assignment 1 score'), ('assignment2_score',
+                                                  'Assignment 2 score'), ('assignment3_score', 'Assignment 3 score'),
+    ('quiz1_score', 'Quiz 1 score'), ('Midterm_exam_score',
+                                      'Midterm exam score'), ('final_exam_score', 'Final exam score'),
+]
+
 
 def fetch_data_from_postgresql():
     global df
@@ -103,6 +120,7 @@ def index():
         rf_model_trained = False
         # Fetch data from the PostgreSQL table
         data = fetch_data_from_postgresql()
+        print(data.columns)
         eng_data = data.drop(columns=[data.columns[0], data.columns[14], data.columns[15],
                              data.columns[16], data.columns[17], data.columns[18], data.columns[19]])
         eng_target = 'Engagement_Level'
@@ -117,7 +135,7 @@ def index():
                     n_estimators=100, random_state=42)
                 rf_model.fit(data[selected_features], data[eng_target])
                 rf_model_trained = True
-    return render_template('index.html', selected_features=selected_features, model_trained=rf_model_trained)
+    return render_template('index.html', selected_features=selected_features, model_trained=rf_model_trained, fields=fields)
 
 
 @app.route('/final-score', methods=['GET', 'POST'])
@@ -160,7 +178,7 @@ def final_score():
                 model.fit(df[selected_features], df[target_column])
 
                 model_trained = True
-    return render_template('student_final_score_pred.html', selected_features=selected_features, engagement=pred_engagement[0], correlation_less_than_minus_0_2=correlation_less_than_minus_0_2, correlation_more_than_0_2=correlation_more_than_0_2, model_trained=model_trained)
+    return render_template('student_final_score_pred.html', selected_features=selected_features, engagement=pred_engagement[0], correlation_less_than_minus_0_2=correlation_less_than_minus_0_2, correlation_more_than_0_2=correlation_more_than_0_2, model_trained=model_trained, fields=fields)
 
 
 @app.route('/predict', methods=['POST'])

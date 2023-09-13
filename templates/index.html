@@ -15,10 +15,16 @@
         <input type="hidden" name="features" value="{{ selected_features|join(',') }}">
         <div class="form-container">
             {% for feature in selected_features %}
-                <div class="form-group">
-                    <label for="{{ feature }}" class="feature-label">{{ feature }}:</label>
-                    <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input">
-                </div>
+            <div class="form-group">
+                <label for="{{ feature }}" class="feature-label">
+                    {% for field_name, label in fields %}
+                        {% if feature == field_name %}
+                            {{ label }} <!-- label that will display -->
+                        {% endif %}
+                    {% endfor %}:
+                </label>
+                <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input">
+            </div>
             {% endfor %}
         </div>
         <input type="submit" value="Predict Final Score">
