@@ -4,75 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CSV Upload, Model Training, and Prediction</title>
+    <title>Student Engagement Prediction</title>
     <link rel="stylesheet" href="{{url_for('static', filename='../static/style.css')}}">
-    <!-- <script>
-        function downloadCSV() {
-            fetch('/download', {
-                method: 'GET',
-            })
-                .then(response => response.blob())
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'data.csv'; // Set the desired file name
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(error => console.error('Error:', error));
-        }   
-    </script> -->
 </head>
 
 <body>
-    {% if file_uploaded and not prediction_result %}
-    <h3>Please enter below required fields for student score prediction</h3>
-    <!-- {% if corr_more_than_0_2 or corr_less_than_minus_0_2 %}
-    <div class="correlation-analysis">
-        <h3>We have trained model using highly correlated features with target column:</h3>
-        <p>
-            {% for col in corr_more_than_0_2 %}
-            {{ col }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-            {% for col in corr_less_than_minus_0_2 %}
-            {{ col }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-        </p>
-    </div>
-    {% endif %} -->
-
-    <!-- {% if corr_minus_0_2_to_0_2 %}
-    <div class="correlation-analysis">
-        <h3>And dropped the features having no/low correlation with target column:</h3>
-        <p>
-            {% for col in corr_minus_0_2_to_0_2 %}
-            {{ col }}{% if not loop.last %}, {% endif %}
-            {% endfor %}
-        </p>
-    </div>
-    {% endif %} -->
-
-    {% if corr_more_than_0_2 %}
-    {% endif %}
-    {% endif %}
-
-    {% if prediction_result %}
-    <div id="predictionResult">
-        <!-- <div style="display: flex; justify-content: space-around;">
-            <h3>Predicted final score: {{ prediction_result }}</h3>
-            <button onclick="downloadCSV()">Download CSV</button>
-        </div> -->
-        <iframe title="powerbi_report" id="Iframe"
-            src="https://app.powerbi.com/reportEmbed?reportId=e005ea73-4088-4798-a173-62bd1a614d92&autoAuth=true&ctid=d7bdcc08-a599-45fe-bbec-f852ee1fd486&navContentPaneEnabled=false"></iframe>
-    </div>
-    {% endif %}
-
-    {% if file_uploaded and model_trained and not prediction_result %}
-    <h4 style="text-align: center">Predict student final exam score</h4>
-    <form action="/predict" method="post">
+    <h3>Please enter below required fields for student engagement prediction</h3>
+    <h4>Predict student engagement level</h4>
+    <form action="/final-score" method="post">
         <input type="hidden" name="features" value="{{ selected_features|join(',') }}">
         <div class="form-container">
             {% for feature in selected_features %}
@@ -82,9 +21,9 @@
                 </div>
             {% endfor %}
         </div>
-        <input type="submit" value="View Prediction Report">
+        <input type="submit" value="Predict Final Score">
     </form>
-    {% endif %}
+
 </body>
 
 </html>

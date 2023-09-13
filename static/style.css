@@ -107,3 +107,6 @@ input[type="submit"]:hover {
     width: 20% !important; /* Adjust the input box width as needed */
     padding: 5px !important;
 }
+h4{
+    text-align: center
+}
