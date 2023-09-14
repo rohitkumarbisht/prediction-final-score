@@ -28,9 +28,7 @@
                         {% endif %}
                     {% endfor %}:
                 </label>
-                <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input"
-                    {% if engagement == 0 %} min="0" max="50" {% elif engagement == 1 %} min="60" max="80" {% elif engagement == 2 %} min="90" max="100" {% endif %}
-                />
+                <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input" />
             </div>
             <script>
                 // Generate random values for the input fields
