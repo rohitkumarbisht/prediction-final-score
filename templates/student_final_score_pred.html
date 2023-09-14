@@ -13,26 +13,35 @@
         Please enter below required fields for student final score prediction
     </h3>
     <h4>
-        Student engagement level is: {% if engagement == 0 %} Low {% elif
-        engagement == 1 %} Moderate {% elif engagement == 2 %} High {% else %}
-        Unknown {% endif %}
+        Student engagement level is: {% if engagement == 0 %} Low {% elif engagement == 1 %} Moderate {% elif engagement == 2 %} High {% else %} Unknown {% endif %}
     </h4>
     <form action="/predict" method="post">
         <input type="hidden" name="features" value="{{ selected_features|join(',') }}" />
         <div class="form-container">
-            {% for feature in selected_features %} {% if feature !=
-            "Engagement_Level" %}
+            {% for feature in selected_features %}
+            {% if feature != "Engagement_Level" %}
             <div class="form-group">
                 <label for="{{ feature }}" class="feature-label">
-                    {% for field_name, label in fields %} 
+                    {% for field_name, label in fields %}
                         {% if feature == field_name %}
                             {{ label }} <!-- label that will display -->
-                        {% endif %} 
+                        {% endif %}
                     {% endfor %}:
                 </label>
-                <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input" />
+                <input type="number" id="{{ feature }}" name="{{ feature }}" placeholder="" class="small-input"
+                    {% if engagement == 0 %} min="0" max="50" {% elif engagement == 1 %} min="60" max="80" {% elif engagement == 2 %} min="90" max="100" {% endif %}
+                />
             </div>
-            {% endif %} {% endfor %}
+            <script>
+                // Generate random values for the input fields
+                var inputElement = document.getElementById("{{ feature }}");
+                var min = {% if engagement == 0 %} 0 {% elif engagement == 1 %} 60 {% elif engagement == 2 %} 90 {% endif %};
+                var max = {% if engagement == 0 %} 50 {% elif engagement == 1 %} 80 {% elif engagement == 2 %} 100 {% endif %};
+                var randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
+                inputElement.value = randomValue;
+            </script>
+            {% endif %}
+            {% endfor %}
         </div>
         <input type="submit" value="View Prediction Report" />
     </form>
