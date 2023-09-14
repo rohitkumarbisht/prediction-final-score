@@ -24,7 +24,7 @@ h4 {
 }
 
 form {
-    max-width: 600px;
+    max-width: 650px;
     margin: 0 auto;
     padding: 20px;
     background-color: #fff;
@@ -109,4 +109,14 @@ input[type="submit"]:hover {
 }
 h4{
     text-align: center
+}
+.dropdown{
+    max-width: 200px;
+    margin: 0 auto;
+    display: flex;
+    padding-bottom: 40px;
+}
+input[type="number"], input[type="range"], select{
+    margin-left: 10px;
+    margin-top: 0px;
 }

@@ -11,7 +11,15 @@
 <body>
     <h3>Please enter below required fields for student engagement prediction</h3>
     <h4>Predict student engagement level</h4>
-    <form action="/final-score" method="post">
+    <div class="dropdown">
+        <label for="engagement_level" class="feature-label">Select:</label>
+        <select id="engagement_level" name="engagement_level">
+            <option value="low">Low (below 50)</option>
+            <option value="moderate">Moderate (50-70)</option>
+            <option value="high">High (70+)</option>
+        </select>
+    </div>
+    <form action="/final-score" method="post" id="prediction-form">
         <input type="hidden" name="features" value="{{ selected_features|join(',') }}">
         <div class="form-container">
             {% for feature in selected_features %}
@@ -27,9 +35,62 @@
             </div>
             {% endfor %}
         </div>
-        <input type="submit" value="Predict Final Score">
+        <input type="submit" value="Predict Engagement Level">
     </form>
 
-</body>
+    <script>
+        // Define data for low, moderate, and high engagement levels
+        var dataForLevels = {
+            "low": {
+                // Define values for each field when "Low" is selected
+                "No_of_Logins": 47,
+                "ContentReads": 60,
+                "ForumReads": 1,
+                "Assignment1_submit": 558,
+                "Assignment2_submit": 296,
+                "Assignment3_submit": 632,
+                "Average_time_to_submit_assignment": 495
+                // Add values for other fields as needed
+            },
+            "moderate": {
+                // Define values for each field when "Moderate" is selected
+                "No_of_Logins": 122,
+                "ContentReads": 211,
+                "ForumReads": 0,
+                "Assignment1_submit": 325,
+                "Assignment2_submit": 237,
+                "Assignment3_submit": 261,
+                "Average_time_to_submit_assignment": 274
+            },
+            "high": {
+                // Define values for each field when "High" is selected
+                "No_of_Logins": 146,
+                "ContentReads": 366,
+                "ForumReads": 0,
+                "Assignment1_submit": 159,
+                "Assignment2_submit": 41,
+                "Assignment3_submit": 89,
+                "Average_time_to_submit_assignment": 96
+            }
+        };
 
+        // Function to update form fields based on the selected engagement level
+        function updateFormFields() {
+            var selectedLevel = document.getElementById("engagement_level").value;
+            var form = document.getElementById("prediction-form");
+
+            // Loop through the selected fields and set their values
+            for (var field in dataForLevels[selectedLevel]) {
+                var inputField = form.querySelector('[name="' + field + '"]');
+                if (inputField) {
+                    inputField.value = dataForLevels[selectedLevel][field];
+                }
+            }
+        }
+        // Add an event listener to the dropdown to trigger field updates
+        document.getElementById("engagement_level").addEventListener("change", updateFormFields);
+        // Call the update function initially to set default values
+        updateFormFields();
+    </script>
+</body>
 </html>
