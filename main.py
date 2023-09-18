@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, send_file
 import pandas as pd
+import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 import psycopg2
@@ -140,7 +141,7 @@ def index():
 
 @app.route('/final-score', methods=['GET', 'POST'])
 def final_score():
-    global model, model_trained, df, insert_data_called, pred_engagement, new_row_pred, rf_model
+    global model, model_trained, df, insert_data_called, pred_engagement, new_row_pred, rf_model, TSS
     selected_features = request.form.get('features').split(',')
     input_values = {}
     for feature in selected_features:
@@ -174,6 +175,8 @@ def final_score():
             selected_features = correlation_more_than_0_2 + correlation_less_than_minus_0_2
 
             if selected_features:
+                mean_y = np.mean(df['final_exam_score'])
+                TSS = np.sum((df['final_exam_score'] - mean_y) ** 2)
                 model = LinearRegression()
                 model.fit(df[selected_features], df[target_column])
 
@@ -208,7 +211,11 @@ def predict_and_update_csv():
         # Make prediction
         input_data = [float(input_values[feature])
                       for feature in selected_features]
+        y_pred = model.predict(df[selected_features])
         prediction = model.predict([input_data])[0]
+        RSS = np.sum((df['final_exam_score'] - y_pred) ** 2)
+        R2 = 1 - (RSS / TSS)  # R2 Score
+
         if prediction < 0:
             prediction = 0
 
