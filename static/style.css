@@ -121,3 +121,14 @@ input[type="number"], input[type="range"], select{
     margin-top: 0px;
     width: 50%;
 }
+
+th {
+    padding: 15px;
+    font-size: 18px;
+    text-align: center
+}
+
+a {
+    text-decoration: none; /* Remove the underline */
+    color: #333; /* Set your desired text color */
+}

@@ -1,14 +1,42 @@
 from flask import Flask, render_template, request, send_file
+from flask_restful import Api, Resource
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LinearRegression
 import psycopg2
+from app.routes.distribution_graph import DistributionGraph
+from app.routes.home import Home
+from app.routes.correlation_with_score import CorrelationWithScore
+from app.routes.correlation_without_score import CorrelationWithoutScore
+from app.routes.correlation_with_eng_level import CorrelationWithEngagementLevel
+from app.routes.engagement_training import EngagementTraining
+from app.routes.with_score_training import WithScoreTraining
+from app.routes.without_score_training import WithoutScoreTraining
+from flask_classful import FlaskView
 
-app = Flask(__name__)
+app = Flask(__name__ ,template_folder='templates')
+api = Api(app)
 
 model = None
 model_trained = False
+
+# api.add_resource(Home, '/')
+Home.register(app, route_base='/')
+
+DistributionGraph.register(app, route_base='/distribution-graph')
+
+CorrelationWithScore.register(app, route_base='/correlation-graph/with-score')
+
+CorrelationWithoutScore.register(app, route_base='/correlation-graph/without-score')
+
+CorrelationWithEngagementLevel.register(app, route_base='/correlation-graph/for-engagement-level')
+
+EngagementTraining.register(app,  route_base='/training/for-engagement-level')
+
+WithScoreTraining.register(app, route_base='/training/with-score/')
+
+WithoutScoreTraining.register(app, route_base='/training/without-score/')
 
 # Define your PostgreSQL database connection settings
 db_host = 'airbyte.cqqg4q5hnscs.ap-south-1.rds.amazonaws.com'
@@ -112,8 +140,12 @@ def perform_correlation_analysis(df, target_column):
 
     return correlation_more_than_0_2, correlation_less_than_minus_0_2, correlation_minus_0_2_to_0_2
 
+# @app.route('/', methods=['GET'])
+# def main():
+#     return render_template('index.html')
 
-@app.route('/', methods=['GET'])
+
+@app.route('/eng-train', methods=['GET'])
 def index():
     global rf_model, rf_model_trained, data, eng_data, insert_data_called
     if request.method == 'GET':
