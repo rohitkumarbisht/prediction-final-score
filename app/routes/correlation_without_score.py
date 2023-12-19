@@ -1,9 +1,9 @@
 from flask_classful import FlaskView
-from flask import make_response, render_template,request,redirect,url_for
+from flask import make_response, render_template,request
 import matplotlib.pyplot as plt
 import os
 from app.routes.distribution_graph import DistributionGraph
-from app.utils.file_open import save_file, save_image
+from app.utils.file_open import save_file, save_image, read_file
 
 class CorrelationWithoutScore(FlaskView):
     def calculate_correlation(self, selected_column):
@@ -14,7 +14,6 @@ class CorrelationWithoutScore(FlaskView):
         csv_data.drop(columns=columns_to_drop, inplace=True)
         correlation_with_Target = csv_data.corr()[selected_column]
         correlation_with_Target = correlation_with_Target.drop(selected_column)
-        print(correlation_with_Target.sort_values(ascending=False))
         return correlation_with_Target.sort_values(ascending=False)
 
     def generate_correlation_graph(self, correlation_data, selected_column):
@@ -62,8 +61,11 @@ class CorrelationWithoutScore(FlaskView):
                 not_correlated = self.find_low_correlated_columns(
                     correlation_data
                 )
+                engagement_columns = read_file("highly_correlated_columns_with_eng_level.txt", "r")
+                without_score = [item for item in highly_correlated if item not in engagement_columns]
+                without_score_correlation = engagement_columns + without_score
                 # save highly correlated columns to a text file
-                save_file(highly_correlated,
+                save_file(without_score_correlation,
                                "highly_correlated_columns_without_score.txt", "w")
                 # save target column to a text file
                 save_file(selected_column, "target_column.txt", "w")
