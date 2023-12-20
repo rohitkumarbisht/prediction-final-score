@@ -4,6 +4,8 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 import contextlib
 import time
+import config
+import psycopg2
 from datetime import date
 from app.routes.distribution_graph import DistributionGraph
 from app.utils.file_open import read_file, open_model, save_file, check_file_exists
@@ -21,6 +23,38 @@ class EngagementTraining(FlaskView):
         XGB_Model = XGBClassifier()
         XGB_Model.fit(X, y)
         return XGB_Model
+    
+    def save_training_results_to_database(self, accuracy, precision, training_time, date_modified):
+        try:
+            with psycopg2.connect(
+                dbname=config.db_name, user=config.db_user, password=config.db_password, host=config.db_host, port=config.db_port
+            ) as conn:
+                with conn.cursor() as cursor:
+                     # Step 1: Retrieve the values from the previous row
+                    select_previous_row_sql = f"SELECT * FROM {config.schema_name}.{config.model_config_table} ORDER BY id DESC LIMIT 1;"
+                    cursor.execute(select_previous_row_sql)
+                    previous_row = cursor.fetchone()
+
+                    if previous_row:
+                        # Step 2: Create a copy of the values from the previous row
+                        previous_values = list(previous_row)
+                        # Step 3: Insert the copy of those values into a new row
+                        column_names = [col.name for col in cursor.description]
+                        insert_sql = f"INSERT INTO {config.schema_name}.{config.model_config_table} ({', '.join(column_names[1:])}) VALUES ({', '.join(['%s'] * (len(column_names) - 1))}) RETURNING *;"
+                        cursor.execute(insert_sql, previous_values[1:])
+                        last_inserted_id = cursor.fetchone()[0]
+
+                        # Step 4: Update specific columns with the new values in the new row using UPDATE command
+                        update_sql = f"UPDATE {config.schema_name}.{config.model_config_table} SET accuracy_eng_level = %s, precision_eng_level = %s, training_time_eng_level = %s, modified_on_eng_level = %s WHERE id = %s;"
+                        cursor.execute(update_sql, (accuracy, precision, training_time, date_modified, last_inserted_id))
+                        conn.commit()
+                    else:
+                        sql = f"INSERT INTO {config.schema_name}.{config.model_config_table} (accuracy_eng_level, precision_eng_level, training_time_eng_level, modified_on_eng_level) VALUES (%s, %s, %s, %s);"
+                        value_tuple = (accuracy, precision, training_time, date_modified)
+                        cursor.execute(sql, value_tuple)
+                        conn.commit()
+        except Exception as e:
+            return make_response({"error": f"Failed to save training results to the database: {e}"}, 500)
 
     def save_training_results_to_text(self, accuracy, precision, training_time, date_modified):
         try:
@@ -68,6 +102,7 @@ class EngagementTraining(FlaskView):
         open_model('xgb_model_engagement.pkl','wb',XGB_Model)
         predict = check_file_exists()
         # save training results to text file
+        self.save_training_results_to_database(accuracy, precision, training_time, modified_on)
         result = self.save_training_results_to_text(
             accuracy, precision, training_time, modified_on)
         if result:
