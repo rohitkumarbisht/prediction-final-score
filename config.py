@@ -6,6 +6,7 @@ db_password = 'F648d&lTHltriVidRa0R'
 db_name = 'learninganalytics'
 schema_name = 'learninganalytics'
 table_name = "student_data"
+model_config_table = "academic_model_config"
 
 fields = [
     ('Student_ID', 'Student id'), ('No_of_Logins', 'No. of logins'), ('ContentReads',
