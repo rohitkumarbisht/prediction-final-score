@@ -1,6 +1,6 @@
 from flask_classful import FlaskView
 from flask import render_template, make_response, Response
-from xgboost import XGBRegressor
+from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
 import contextlib
 import time
@@ -19,21 +19,18 @@ class WithoutScoreTraining(FlaskView):
             return make_response({"error": f"File not found: {e.filename}"}, 404)
 
     def train_model(self, X, y):
-        xgb_model = XGBRegressor()
-        xgb_model.fit(X, y)
-        return xgb_model
+        linear_model = LinearRegression()
+        linear_model.fit(X, y)
+        return linear_model
     
     def evaluation_metrics_cal(self,model,X,y):
-        scores = cross_validate(model,X,y,cv=10,scoring=('r2','neg_mean_squared_error','neg_mean_absolute_error'), return_train_score=True)
+        scores = cross_validate(model,X,y,cv=3,scoring=('r2','neg_mean_squared_error','neg_mean_absolute_error'), return_train_score=True)
         r2_arr = scores['train_r2']
         mse_arr = -scores['test_neg_mean_squared_error']
         mae_arr = -scores['test_neg_mean_absolute_error']
-        r2_score = int(np.mean(r2_arr) * 100) / 100.0
-        # np.mean(r2_arr)
+        r2_score = int((r2_arr[1]) * 100) / 100.0
         mse = np.mean(mse_arr)
-        np.mean(mse_arr)
         mae = np.mean(mae_arr)
-        print(mse_arr)
         return r2_score,mse,mae
 
 
@@ -69,16 +66,16 @@ class WithoutScoreTraining(FlaskView):
         # Start measuring the training time
         start_time = time.time()
         #  Train the Neural Network model
-        xgb_model = self.train_model(X, y)
+        linear_model = self.train_model(X, y)
         end_time = time.time()
         # Calculate the training time
         training_time = end_time - start_time
         # calculate accuracy, precision & modified_on
-        r2,mse,mae = self.evaluation_metrics_cal(xgb_model,X,y)
+        r2,mse,mae = self.evaluation_metrics_cal(linear_model,X,y)
         today = date.today()
         modified_on = today.isoformat()
         # Save the model to file
-        open_model('xgb_model_without_score.pkl','wb',xgb_model)
+        open_model('linear_model_without_score.pkl','wb',linear_model)
         predict = check_file_exists()
         # save training results to text file
         result = self.save_training_results_to_text(

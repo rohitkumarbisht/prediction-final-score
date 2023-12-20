@@ -14,7 +14,6 @@ class CorrelationWithEngagementLevel(FlaskView):
         # Perform correlation calculation
         correlation_with_Target = csv_data.corr()[selected_column]
         correlation_with_Target = correlation_with_Target.drop(selected_column)
-        print(correlation_with_Target.sort_values(ascending=False))
         return correlation_with_Target.sort_values(ascending=False)
 
     def generate_correlation_graph(self, correlation_data, selected_column):

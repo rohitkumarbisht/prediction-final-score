@@ -4,7 +4,6 @@ from xgboost import XGBClassifier
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 import contextlib
 import time
-import os
 from datetime import date
 from app.routes.distribution_graph import DistributionGraph
 from app.utils.file_open import read_file, open_model, save_file, check_file_exists

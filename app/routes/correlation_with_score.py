@@ -1,9 +1,9 @@
 from flask_classful import FlaskView
-from flask import make_response, render_template,request,redirect,url_for
+from flask import make_response, render_template,request
 import matplotlib.pyplot as plt
 import os
 from app.routes.distribution_graph import DistributionGraph
-from app.utils.file_open import save_file, save_image
+from app.utils.file_open import save_file, save_image, read_file
 
 class CorrelationWithScore(FlaskView):
     def calculate_correlation(self, selected_column):
@@ -60,8 +60,11 @@ class CorrelationWithScore(FlaskView):
                 not_correlated = self.find_low_correlated_columns(
                     correlation_data
                 )
-                # save highly correlated columns to a text file
-                save_file(highly_correlated,
+                engagement_columns = read_file("highly_correlated_columns_with_eng_level.txt", "r")
+                with_score = [item for item in highly_correlated if item not in engagement_columns]
+                with_score_correlation = engagement_columns + with_score
+                        # save highly correlated columns to a text file
+                save_file(with_score_correlation,
                                "highly_correlated_columns_with_score.txt", "w")
                 # save target column to a text file
                 save_file(selected_column, "target_column.txt", "w")

@@ -20,7 +20,6 @@ class DistributionGraph(FlaskView):
     def fetch_csv_data(self):
         upload_csv_instance = UploadCSV()
         uploaded_data = upload_csv_instance.fetch_data()
-        # global csv_data
         if uploaded_data is None:
             self.csv_data = self.fetch_data_from_postgresql()
         else:

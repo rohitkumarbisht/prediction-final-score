@@ -35,9 +35,9 @@ def save_image(image_name):
 def check_file_exists():
     try:
         xgb_model_engagement_exists = os.path.exists('xgb_model_engagement.pkl')
-        xgb_model_with_score_exists = os.path.exists('xgb_model_with_score.pkl')
-        xgb_model_without_score_exists = os.path.exists('xgb_model_without_score.pkl')
-        proceed_prediction = xgb_model_engagement_exists and xgb_model_with_score_exists and xgb_model_without_score_exists
+        linear_model_with_score_exists = os.path.exists('linear_model_with_score.pkl')
+        linear_model_without_score_exists = os.path.exists('linear_model_without_score.pkl')
+        proceed_prediction = xgb_model_engagement_exists and linear_model_with_score_exists and linear_model_without_score_exists
     except Exception as e:
         return e
     return proceed_prediction
