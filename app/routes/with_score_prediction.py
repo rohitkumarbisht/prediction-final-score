@@ -1,14 +1,18 @@
-from flask_classful import FlaskView
-from flask import render_template, request, make_response
-from app.utils.file_open import open_model, read_file
-from app.routes.engagement_prediction import EngagementPrediction, insert_data_called
 import ast
-import config
-import psycopg2
+
 import pandas as pd
+import psycopg2
+from flask import make_response, render_template, request
+from flask_classful import FlaskView
+
+import config
+from app.routes.engagement_prediction import (EngagementPrediction,
+                                              insert_data_called)
+from app.utils.file_open import open_model, read_file
+
 
 class WithScorePrediction(FlaskView):
-    def update_csv(self,input_values):
+    def update_csv(self, input_values):
         engagement_prediction_instance = EngagementPrediction()
         new_row_pred = engagement_prediction_instance.fetch_new_row_pred()
         pred_eng = engagement_prediction_instance.use_pred_val()
@@ -20,8 +24,8 @@ class WithScorePrediction(FlaskView):
         combined_row = {**new_row_pred, **new_row}
         new_df = pd.DataFrame(combined_row)
         return new_df
-    
-    def insert_data_to_database(self,new_df,prediction):
+
+    def insert_data_to_database(self, new_df, prediction):
         global insert_data_called
         last_row_index = new_df.index[-1]
         target_column = read_file("target_column.txt", "r")
@@ -55,7 +59,7 @@ class WithScorePrediction(FlaskView):
                 print(f"Error inserting data into PostgreSQL table: {str(e)}")
                 return "Error inserting data into PostgreSQL table", 500
         return "Successfully updated database"
-    
+
     def post(self):
         try:
             model_pkl = open_model('linear_model_with_score.pkl', 'rb')
@@ -64,7 +68,7 @@ class WithScorePrediction(FlaskView):
 
         selected_features = request.form.get('features_with_score').split(',')
         previous_features = (request.form.get('pred_value'))
-        previous_features_list =ast.literal_eval(previous_features)
+        previous_features_list = ast.literal_eval(previous_features)
 
         if selected_features is None:
             return make_response({"error": "No input data provided in the request body"}, 400)
@@ -76,13 +80,12 @@ class WithScorePrediction(FlaskView):
         try:
             new_df = self.update_csv(input_values)
             input_data = [float(input_values[feature])
-                      for feature in selected_features]
+                          for feature in selected_features]
             final_features = previous_features_list + input_data
             prediction = model_pkl.predict([final_features])
             if prediction[0] < 0:
                 prediction[0] = 0
-            self.insert_data_to_database(new_df,prediction)
+            self.insert_data_to_database(new_df, prediction)
             return render_template('final_result.html')
         except Exception as e:
-                return f"{str(e)}", 500
-
+            return f"{str(e)}", 500

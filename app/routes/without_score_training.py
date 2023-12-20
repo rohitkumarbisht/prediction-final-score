@@ -1,15 +1,19 @@
-from flask_classful import FlaskView
-from flask import render_template, make_response, Response
-from sklearn.linear_model import LinearRegression
-from sklearn.model_selection import StratifiedKFold, cross_validate
 import contextlib
 import time
-import numpy as np
-import config
-import psycopg2
 from datetime import date
+
+import numpy as np
+import psycopg2
+from flask import Response, make_response, render_template
+from flask_classful import FlaskView
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import StratifiedKFold, cross_validate
+
+import config
 from app.routes.distribution_graph import DistributionGraph
-from app.utils.file_open import read_file, open_model, save_file, check_file_exists
+from app.utils.file_open import (check_file_exists, open_model, read_file,
+                                 save_file)
+
 
 class WithoutScoreTraining(FlaskView):
     @contextlib.contextmanager
@@ -24,16 +28,17 @@ class WithoutScoreTraining(FlaskView):
         linear_model = LinearRegression()
         linear_model.fit(X, y)
         return linear_model
-    
-    def evaluation_metrics_cal(self,model,X,y):
-        scores = cross_validate(model,X,y,cv=3,scoring=('r2','neg_mean_squared_error','neg_mean_absolute_error'), return_train_score=True)
+
+    def evaluation_metrics_cal(self, model, X, y):
+        scores = cross_validate(model, X, y, cv=3, scoring=(
+            'r2', 'neg_mean_squared_error', 'neg_mean_absolute_error'), return_train_score=True)
         r2_arr = scores['train_r2']
         mse_arr = -scores['test_neg_mean_squared_error']
         mae_arr = -scores['test_neg_mean_absolute_error']
         r2_score = int((r2_arr[1]) * 100) / 100.0
         mse = np.mean(mse_arr)
         mae = np.mean(mae_arr)
-        return r2_score,mse,mae
+        return r2_score, mse, mae
 
     def save_training_results_to_database(self, r2, training_time, date_modified):
         try:
@@ -41,7 +46,7 @@ class WithoutScoreTraining(FlaskView):
                 dbname=config.db_name, user=config.db_user, password=config.db_password, host=config.db_host, port=config.db_port
             ) as conn:
                 with conn.cursor() as cursor:
-                     # Step 1: Retrieve the values from the previous row
+                    # Step 1: Retrieve the values from the previous row
                     select_previous_row_sql = f"SELECT * FROM {config.schema_name}.{config.model_config_table} ORDER BY id DESC LIMIT 1;"
                     cursor.execute(select_previous_row_sql)
                     previous_row = cursor.fetchone()
@@ -58,7 +63,8 @@ class WithoutScoreTraining(FlaskView):
 
                         # Step 4: Update specific columns with the new values in the new row using UPDATE command
                         update_sql = f"UPDATE {config.schema_name}.{config.model_config_table} SET r2_score_without_score = %s, training_time_without_score = %s, modified_on_without_score = %s WHERE id = %s;"
-                        cursor.execute(update_sql, (r2, training_time, date_modified, last_inserted_id))
+                        cursor.execute(
+                            update_sql, (r2, training_time, date_modified, last_inserted_id))
                         conn.commit()
                     else:
                         sql = f"INSERT INTO {config.schema_name}.{config.model_config_table} (r2_score_without_score, training_time_without_score, modified_on_without_score) VALUES (%s, %s, %s, %s);"
@@ -67,7 +73,7 @@ class WithoutScoreTraining(FlaskView):
                         conn.commit()
         except Exception as e:
             return make_response({"error": f"Failed to save training results to the database: {e}"}, 500)
-        
+
     def save_training_results_to_text(self, r2, mse, mae, training_time, date_modified):
         try:
             parameters = {
@@ -76,10 +82,11 @@ class WithoutScoreTraining(FlaskView):
                 'mean_absolute_error': mae,
                 'training_time': training_time,
                 'modified_on': date_modified
-                }
-            data_to_save = "\n".join([f"{key}: {value}" for key, value in parameters.items()])
+            }
+            data_to_save = "\n".join(
+                [f"{key}: {value}" for key, value in parameters.items()])
             save_file(data_to_save,
-                              "training_results_without_score.txt", "w")
+                      "training_results_without_score.txt", "w")
 
         except Exception as e:
             return make_response({"error": f"Failed to save training results to the textfile: {e}"}, 500)
@@ -87,7 +94,8 @@ class WithoutScoreTraining(FlaskView):
     def get(self):
         csv_data_instance = DistributionGraph()
         csv_data = csv_data_instance.fetch_csv_data()
-        actual_columns = read_file("highly_correlated_columns_without_score.txt", "r")
+        actual_columns = read_file(
+            "highly_correlated_columns_without_score.txt", "r")
         if isinstance(actual_columns, Response):
             return actual_columns
         selected_column = read_file("target_column.txt", "r")
@@ -105,16 +113,16 @@ class WithoutScoreTraining(FlaskView):
         # Calculate the training time
         training_time = end_time - start_time
         # calculate accuracy, precision & modified_on
-        r2,mse,mae = self.evaluation_metrics_cal(linear_model,X,y)
+        r2, mse, mae = self.evaluation_metrics_cal(linear_model, X, y)
         today = date.today()
         modified_on = today.isoformat()
         # Save the model to file
-        open_model('linear_model_without_score.pkl','wb',linear_model)
+        open_model('linear_model_without_score.pkl', 'wb', linear_model)
         predict = check_file_exists()
-        self.save_training_results_to_database(r2,training_time,modified_on)
+        self.save_training_results_to_database(r2, training_time, modified_on)
         result = self.save_training_results_to_text(
-            r2, mse,mae, training_time, modified_on)
+            r2, mse, mae, training_time, modified_on)
         if result:
             return result
 
-        return render_template ("training.html", predict=predict ,r2= r2, mse = mse, mae=mae, training_time = training_time, date_modified = modified_on)
+        return render_template("training.html", predict=predict, r2=r2, mse=mse, mae=mae, training_time=training_time, date_modified=modified_on)

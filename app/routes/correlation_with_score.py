@@ -1,9 +1,12 @@
-from flask_classful import FlaskView
-from flask import make_response, render_template,request
-import matplotlib.pyplot as plt
 import os
+
+import matplotlib.pyplot as plt
+from flask import make_response, render_template, request
+from flask_classful import FlaskView
+
 from app.routes.distribution_graph import DistributionGraph
-from app.utils.file_open import save_file, save_image, read_file
+from app.utils.file_open import read_file, save_file, save_image
+
 
 class CorrelationWithScore(FlaskView):
     def calculate_correlation(self, selected_column):
@@ -32,8 +35,8 @@ class CorrelationWithScore(FlaskView):
 
     def find_highly_correlated_columns(self, correlation_data, lower_threshold=-0.2, upper_threshold=0.2):
         return [col for col in correlation_data.index if not (lower_threshold <= correlation_data[col] <= upper_threshold)]
-    
-    def find_low_correlated_columns(self,correlation_data,lower_threshold=-0.2, upper_threshold=0.2):
+
+    def find_low_correlated_columns(self, correlation_data, lower_threshold=-0.2, upper_threshold=0.2):
         return [col for col in correlation_data.index if (lower_threshold <= correlation_data[col] <= upper_threshold)]
 
     def open_file(self, columns, filename, mode):
@@ -41,7 +44,7 @@ class CorrelationWithScore(FlaskView):
             file.write("\n".join(columns))
 
     def get(self):
-        selected_column=request.args.get("selected_column")
+        selected_column = request.args.get("selected_column")
         try:
             if not selected_column:
                 return make_response({"error": 'No target column was selected'}, 400)
@@ -60,17 +63,19 @@ class CorrelationWithScore(FlaskView):
                 not_correlated = self.find_low_correlated_columns(
                     correlation_data
                 )
-                engagement_columns = read_file("highly_correlated_columns_with_eng_level.txt", "r")
-                with_score = [item for item in highly_correlated if item not in engagement_columns]
+                engagement_columns = read_file(
+                    "highly_correlated_columns_with_eng_level.txt", "r")
+                with_score = [
+                    item for item in highly_correlated if item not in engagement_columns]
                 with_score_correlation = engagement_columns + with_score
-                        # save highly correlated columns to a text file
+                # save highly correlated columns to a text file
                 save_file(with_score_correlation,
-                               "highly_correlated_columns_with_score.txt", "w")
+                          "highly_correlated_columns_with_score.txt", "w")
                 # save target column to a text file
                 save_file(selected_column, "target_column.txt", "w")
 
             if os.path.exists(png_path):
-                return render_template("correlation_graph.html",selected_column=selected_column,col_no = not_correlated,col_cor = highly_correlated)
+                return render_template("correlation_graph.html", selected_column=selected_column, col_no=not_correlated, col_cor=highly_correlated)
             else:
                 # 404 Not Found
                 return make_response({"error": "Correlation graph not found"}, 404)

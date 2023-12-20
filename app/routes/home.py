@@ -1,5 +1,6 @@
-from flask_classful import FlaskView
 from flask import render_template
+from flask_classful import FlaskView
+
 
 class Home(FlaskView):
     def get(self):

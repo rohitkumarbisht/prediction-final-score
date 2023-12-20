@@ -1,12 +1,15 @@
-from flask_classful import FlaskView
+import os
+
+import matplotlib.pyplot as plt
+import pandas as pd
+import psycopg2
 from flask import render_template
+from flask_classful import FlaskView
+
+import config
 from app.routes.upload_csv import UploadCSV
 from app.utils.file_open import save_image
-import pandas as pd
-import config
-import psycopg2
-import os
-import matplotlib.pyplot as plt
+
 
 class DistributionGraph(FlaskView):
     _instance = None
@@ -16,7 +19,7 @@ class DistributionGraph(FlaskView):
             cls._instance = super(DistributionGraph, cls).__new__(cls)
             cls._instance.csv_data = None
         return cls._instance
-    
+
     def fetch_csv_data(self):
         upload_csv_instance = UploadCSV()
         uploaded_data = upload_csv_instance.fetch_data()
@@ -25,7 +28,7 @@ class DistributionGraph(FlaskView):
         else:
             self.csv_data = uploaded_data
         return self.csv_data
-    
+
     # connect with the PostgreSQL Server
     def fetch_data_from_postgresql(self):
         try:
@@ -52,12 +55,12 @@ class DistributionGraph(FlaskView):
 
             cursor.close()
             conn.close()
-            updated_df = df.drop(columns= 'Student_ID')
+            updated_df = df.drop(columns='Student_ID')
             return updated_df
-        
+
         except Exception as e:
-            return ({f"Error fetching data from PostgreSQL: {str(e)}"},500)
-        
+            return ({f"Error fetching data from PostgreSQL: {str(e)}"}, 500)
+
     def generate_distribution_graph(self, csv_data):
         try:
             num_columns = len(csv_data.columns)
@@ -82,7 +85,7 @@ class DistributionGraph(FlaskView):
 
         except Exception as e:
             return e
-    
+
     def get(self):
         csv_df = self.fetch_csv_data()
         try:
@@ -94,7 +97,7 @@ class DistributionGraph(FlaskView):
                 self.generate_distribution_graph(csv_df)
                 png_path = save_image('distribution.png')
                 if os.path.exists(png_path):
-                    return render_template('distribution_graph.html',columns=list(csv_df.columns), fields = config.fields)
+                    return render_template('distribution_graph.html', columns=list(csv_df.columns), fields=config.fields)
                 else:
                     return ({"error": "Distribution graph not found"}, 404)
         except Exception as e:

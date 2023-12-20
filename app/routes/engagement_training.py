@@ -1,14 +1,18 @@
-from flask_classful import FlaskView
-from flask import render_template, make_response, Response
-from xgboost import XGBClassifier
-from sklearn.model_selection import cross_val_score, StratifiedKFold
 import contextlib
 import time
-import config
-import psycopg2
 from datetime import date
+
+import psycopg2
+from flask import Response, make_response, render_template
+from flask_classful import FlaskView
+from sklearn.model_selection import StratifiedKFold, cross_val_score
+from xgboost import XGBClassifier
+
+import config
 from app.routes.distribution_graph import DistributionGraph
-from app.utils.file_open import read_file, open_model, save_file, check_file_exists
+from app.utils.file_open import (check_file_exists, open_model, read_file,
+                                 save_file)
+
 
 class EngagementTraining(FlaskView):
     @contextlib.contextmanager
@@ -23,14 +27,14 @@ class EngagementTraining(FlaskView):
         XGB_Model = XGBClassifier()
         XGB_Model.fit(X, y)
         return XGB_Model
-    
+
     def save_training_results_to_database(self, accuracy, precision, training_time, date_modified):
         try:
             with psycopg2.connect(
                 dbname=config.db_name, user=config.db_user, password=config.db_password, host=config.db_host, port=config.db_port
             ) as conn:
                 with conn.cursor() as cursor:
-                     # Step 1: Retrieve the values from the previous row
+                    # Step 1: Retrieve the values from the previous row
                     select_previous_row_sql = f"SELECT * FROM {config.schema_name}.{config.model_config_table} ORDER BY id DESC LIMIT 1;"
                     cursor.execute(select_previous_row_sql)
                     previous_row = cursor.fetchone()
@@ -46,11 +50,13 @@ class EngagementTraining(FlaskView):
 
                         # Step 4: Update specific columns with the new values in the new row using UPDATE command
                         update_sql = f"UPDATE {config.schema_name}.{config.model_config_table} SET accuracy_eng_level = %s, precision_eng_level = %s, training_time_eng_level = %s, modified_on_eng_level = %s WHERE id = %s;"
-                        cursor.execute(update_sql, (accuracy, precision, training_time, date_modified, last_inserted_id))
+                        cursor.execute(
+                            update_sql, (accuracy, precision, training_time, date_modified, last_inserted_id))
                         conn.commit()
                     else:
                         sql = f"INSERT INTO {config.schema_name}.{config.model_config_table} (accuracy_eng_level, precision_eng_level, training_time_eng_level, modified_on_eng_level) VALUES (%s, %s, %s, %s);"
-                        value_tuple = (accuracy, precision, training_time, date_modified)
+                        value_tuple = (accuracy, precision,
+                                       training_time, date_modified)
                         cursor.execute(sql, value_tuple)
                         conn.commit()
         except Exception as e:
@@ -63,10 +69,11 @@ class EngagementTraining(FlaskView):
                 'precision': precision,
                 'training_time': training_time,
                 'modified_on': date_modified
-                }
-            data_to_save = "\n".join([f"{key}: {value}" for key, value in parameters.items()])
+            }
+            data_to_save = "\n".join(
+                [f"{key}: {value}" for key, value in parameters.items()])
             save_file(data_to_save,
-                              "training_results_eng_level.txt", "w")
+                      "training_results_eng_level.txt", "w")
 
         except Exception as e:
             return make_response({"error": f"Failed to save training results to the textfile: {e}"}, 500)
@@ -74,7 +81,8 @@ class EngagementTraining(FlaskView):
     def get(self):
         csv_data_instance = DistributionGraph()
         csv_data = csv_data_instance.fetch_csv_data()
-        actual_columns = read_file("highly_correlated_columns_with_eng_level.txt", "r")
+        actual_columns = read_file(
+            "highly_correlated_columns_with_eng_level.txt", "r")
         if isinstance(actual_columns, Response):
             return actual_columns
         selected_column = read_file("target_column_eng_level.txt", "r")
@@ -99,13 +107,14 @@ class EngagementTraining(FlaskView):
         today = date.today()
         modified_on = today.isoformat()
         # Save the model to file
-        open_model('xgb_model_engagement.pkl','wb',XGB_Model)
+        open_model('xgb_model_engagement.pkl', 'wb', XGB_Model)
         predict = check_file_exists()
         # save training results to text file
-        self.save_training_results_to_database(accuracy, precision, training_time, modified_on)
+        self.save_training_results_to_database(
+            accuracy, precision, training_time, modified_on)
         result = self.save_training_results_to_text(
             accuracy, precision, training_time, modified_on)
         if result:
             return result
 
-        return render_template ("training.html", predict=predict ,accuracy= accuracy, precision = precision, training_time = training_time, date_modified = modified_on)
+        return render_template("training.html", predict=predict, accuracy=accuracy, precision=precision, training_time=training_time, date_modified=modified_on)
