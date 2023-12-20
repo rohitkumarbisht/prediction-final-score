@@ -11,7 +11,10 @@ class WithScorePrediction(FlaskView):
     def update_csv(self,input_values):
         engagement_prediction_instance = EngagementPrediction()
         new_row_pred = engagement_prediction_instance.fetch_new_row_pred()
+        pred_eng = engagement_prediction_instance.use_pred_val()
         new_row = {}
+        if "Engagement_Level" not in input_values:
+            input_values["Engagement_Level"] = pred_eng
         for feature, value in input_values.items():
             new_row[feature] = [value]
         combined_row = {**new_row_pred, **new_row}
@@ -76,8 +79,10 @@ class WithScorePrediction(FlaskView):
                       for feature in selected_features]
             final_features = previous_features_list + input_data
             prediction = model_pkl.predict([final_features])
+            if prediction[0] < 0:
+                prediction[0] = 0
             self.insert_data_to_database(new_df,prediction)
-            return f"response is {prediction}"
+            return render_template('final_result.html')
         except Exception as e:
                 return f"{str(e)}", 500
 

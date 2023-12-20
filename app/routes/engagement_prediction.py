@@ -15,6 +15,7 @@ class EngagementPrediction(FlaskView):
         if cls._instance is None:
             cls._instance = super(EngagementPrediction, cls).__new__(cls)
             cls._instance.new_row_pred = None
+            cls._instance.eng_pred = None
         return cls._instance
     
     def fetch_new_row_pred(self):
@@ -23,6 +24,9 @@ class EngagementPrediction(FlaskView):
         else:
             return self.new_row_pred
     
+    def use_pred_val(self):
+        return self.eng_pred   
+     
     def get_final_score_columns(self):
         engagement_columns = read_file("highly_correlated_columns_with_eng_level.txt", "r")
         without_score_column = read_file("highly_correlated_columns_without_score.txt", "r")
@@ -57,6 +61,7 @@ class EngagementPrediction(FlaskView):
             input_data = [float(input_values[feature])
                         for feature in selected_features]
             pred_engagement = model_pkl.predict([input_data])
+            self.eng_pred = pred_engagement[0]
             with_score, without_score = self.get_final_score_columns()
 
         except Exception as e:
