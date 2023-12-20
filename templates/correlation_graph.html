@@ -1,47 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="{{url_for('static', filename='../static/correlation.css')}}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>Predictive Analytics</title>
-</head>
-<body>
-    <h2>Correlation Analysis</h2>
-    <div class="toggle-graph">
-        <button id="toggleButton" class="toggle-button" onclick="toggleGraph()">
-            <i class="fa fa-caret-down"></i> View Graph
-        </button>
-        <div id="graph-container" class="graph-container hidden">
-            <img class="correlation-graph" src="{{ url_for('static', filename='../static/images/correlation_graph.png') }}" alt="Correlation Graph">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet"
+            href="{{url_for('static', filename='../static/correlation.css')}}">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <title>Predictive Analytics</title>
+    </head>
+    <body>
+        <h2>Correlation Analysis</h2>
+        <div class="toggle-graph">
+            <button id="toggleButton" class="toggle-button"
+                onclick="toggleGraph()">
+                <i class="fa fa-caret-down"></i> View Graph
+            </button>
+            <div id="graph-container" class="graph-container hidden">
+                <img class="correlation-graph"
+                    src="{{ url_for('static', filename='../static/images/correlation_graph.png') }}"
+                    alt="Correlation Graph">
+            </div>
         </div>
-    </div>
-    <!-- <h2>Correlation </h2> -->
-    <div class="correlation-data">
-        {% if col_no %}
+        <!-- <h2>Correlation </h2> -->
+        <div class="correlation-data">
+            {% if col_no %}
             <p>
                 <b>Columns having no/low correlation with {{selected_column}}:</b>
                 {% for col in col_no %}
-                    {{col}},
+                {{col}},
                 {% endfor %}
             </p>
-        {% endif %}
+            {% endif %}
 
-        {% if col_cor %}
+            {% if col_cor %}
             <p>
                 <b>Columns having high correlation with {{selected_column}}:</b>
                 {% for col in col_cor %}
-                    {{col}},
+                {{col}},
                 {% endfor %}
             </p>
-        {% endif %}
-        <p>Note: The parameters having no correlation with {{selected_column}} will be dropped at the time of training.</p>
-    </div>
-    <div>
-        <button class="cor-btn" onclick="uploadPath()" >Train The Model</button> 
-    </div>
-    <script>
+            {% endif %}
+            <p>Note: The parameters having no correlation with
+                {{selected_column}} will be dropped at the time of training.</p>
+        </div>
+        <div>
+            <button class="cor-btn" onclick="uploadPath()">Train The Model</button>
+        </div>
+        <script>
         function toggleGraph() {
             const graphContainer = document.getElementById("graph-container");
             const toggleButton = document.getElementById("toggleButton");
@@ -70,5 +76,5 @@
             window.location.href = newPath;
         }
     </script>
-</body>
+    </body>
 </html>

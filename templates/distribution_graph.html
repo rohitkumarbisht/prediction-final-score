@@ -1,20 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <title>Distribution Graph</title>
-    <link rel="stylesheet" href="{{url_for('static', filename='../static/distribution_graph.css')}}">
-</head>
-<h2>Dataset Analysis</h2>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <title>Distribution Graph</title>
+        <link rel="stylesheet"
+            href="{{url_for('static', filename='../static/distribution_graph.css')}}">
+    </head>
+    <h2>Dataset Analysis</h2>
     <div class="toggle-graph">
         <button id="toggleButton" class="toggle-button" onclick="toggleGraph()">
             <i class="fa fa-caret-down"></i> Distribution Graph
         </button>
         <div id="graph-container" class="graph-container hidden">
-            <img class="distribution-graph" src="{{ url_for('static', filename='../static/images/distribution.png') }}" alt="Distribution Graph">
+            <img class="distribution-graph"
+                src="{{ url_for('static', filename='../static/images/distribution.png') }}"
+                alt="Distribution Graph">
         </div>
     </div>
     <h4>Select a column to generate correlation graph</h4>
@@ -24,24 +28,32 @@
             <div class="dropdown">
                 <select id="selected_column" name="selected_column">
                     {% for column in columns %}
-                    
-                <option value="{{ column }}" {% if column == 'final_exam_score' or column == selected_column %}selected{% endif %}>
-                    {% for field_name, label in fields %}
-                    {% if column==field_name %}
-                    {{ label }}
-                    {% endif %}
-                    {% endfor %}                    
-                </option>
-            {% endfor %}
+
+                    <option value="{{ column }}" {% if column ==
+                        'final_exam_score' or column == selected_column
+                        %}selected{% endif %}>
+                        {% for field_name, label in fields %}
+                        {% if column==field_name %}
+                        {{ label }}
+                        {% endif %}
+                        {% endfor %}
+                    </option>
+                    {% endfor %}
                 </select>
             </div>
             <div>
                 <div>
-                    <input class="correlation-submit" type="submit" value="Show Correlation For Engagement Level" onclick="submitForm('for_eng_level')">
+                    <input class="correlation-submit" type="submit"
+                        value="Show Correlation For Engagement Level"
+                        onclick="submitForm('for_eng_level')">
                 </div>
                 <div class="submit_buttons">
-                    <input class="correlation-submit" type="submit" value="Show Correlation With Scores" onclick="submitForm('with_scores')" >
-                    <input class="correlation-submit" type="submit" value="Show Correlation Without Scores" onclick="submitForm('without_scores')">
+                    <input class="correlation-submit" type="submit"
+                        value="Show Correlation With Scores"
+                        onclick="submitForm('with_scores')">
+                    <input class="correlation-submit" type="submit"
+                        value="Show Correlation Without Scores"
+                        onclick="submitForm('without_scores')">
                 </div>
             </div>
         </form>
@@ -72,7 +84,7 @@
             form.submit();
         }
     </script>
-<body>
-    
-</body>
+    <body>
+
+    </body>
 </html>

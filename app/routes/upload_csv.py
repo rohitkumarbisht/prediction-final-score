@@ -1,7 +1,9 @@
-from flask import request,make_response
-from flask_restful import Resource
 import io
+
 import pandas as pd
+from flask import make_response, request
+from flask_restful import Resource
+
 
 class UploadCSV(Resource):
     _instance = None
@@ -11,7 +13,7 @@ class UploadCSV(Resource):
             cls._instance = super(UploadCSV, cls).__new__(cls)
             cls._instance.uploaded_data = None
         return cls._instance
-    
+
     def fetch_data(self):
         if self.uploaded_data is None:
             return None
