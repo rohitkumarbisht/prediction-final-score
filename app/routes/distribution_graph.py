@@ -55,7 +55,9 @@ class DistributionGraph(FlaskView):
 
             cursor.close()
             conn.close()
-            updated_df = df.drop(columns='Student_ID')
+            columns_to_drop = ['Student_ID', 'predicted_engagement_level',
+                               'predicted_final_exam_score', 'prediction_confidence']
+            updated_df = df.drop(columns=columns_to_drop)
             return updated_df
 
         except Exception as e:

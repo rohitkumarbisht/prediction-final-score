@@ -53,7 +53,7 @@ class EngagementPrediction(FlaskView):
         input_values = {}
         for feature in selected_features:
             # Capture input values
-            input_values[feature] = request.form[feature]
+            input_values[feature] = float(request.form[feature])
 
         try:
             # Create a new row with the input values
@@ -66,7 +66,7 @@ class EngagementPrediction(FlaskView):
             input_data = [float(input_values[feature])
                           for feature in selected_features]
             pred_engagement = model_pkl.predict([input_data])
-            self.eng_pred = pred_engagement[0]
+            self.eng_pred = float(pred_engagement[0])
             with_score, without_score = self.get_final_score_columns()
 
         except Exception as e:
