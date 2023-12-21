@@ -16,9 +16,13 @@ class WithoutScorePrediction(FlaskView):
         engagement_prediction_instance = EngagementPrediction()
         new_row_pred = engagement_prediction_instance.fetch_new_row_pred()
         pred_eng = engagement_prediction_instance.use_pred_val()
+        r2_score = self.fetch_r2_score_with_score()
+        label = 'High' if r2_score is not None and r2_score >= 0.5 else (
+            'Medium' if r2_score is not None and 0.25 <= r2_score < 0.5 else 'Low')
         new_row = {}
-        if "Engagement_Level" not in input_values:
-            input_values["Engagement_Level"] = pred_eng
+        if "predicted_engagement_level" not in input_values:
+            input_values["predicted_engagement_level"] = pred_eng
+            input_values["prediction_confidence"] = label
         if not bool(input_values):
             combined_row = {**new_row_pred}
         else:
@@ -32,7 +36,7 @@ class WithoutScorePrediction(FlaskView):
     def insert_data_to_database(self, new_df, prediction):
         global insert_data_called
         last_row_index = new_df.index[-1]
-        target_column = read_file("target_column.txt", "r")
+        target_column = ['predicted_final_exam_score']
         # # Update the last row's last column with the predicted value
         new_df.at[last_row_index, target_column[0]] = prediction
         num_columns = new_df.shape[1]
@@ -43,7 +47,10 @@ class WithoutScorePrediction(FlaskView):
         value_tuple = ()
         for i in range(num_columns):
             value = new_df.iloc[-1, i]
-            value_tuple += (float(value),)
+            if type(value) is str:
+                value_tuple += (value,)
+            else:
+                value_tuple += (float(value),)
         if insert_data_called == False:
             try:
                 conn = psycopg2.connect(
@@ -64,6 +71,26 @@ class WithoutScorePrediction(FlaskView):
                 return "Error inserting data into PostgreSQL table", 500
         return "Successfully updated database"
 
+    def fetch_r2_score_with_score(self):
+        try:
+            conn = psycopg2.connect(
+                host=config.db_host,
+                port=config.db_port,
+                user=config.db_user,
+                password=config.db_password,
+                database=config.db_name
+            )
+            cursor = conn.cursor()
+            cursor.execute(
+                f"SELECT r2_score_without_score FROM {config.db_name}.{config.schema_name}.{config.model_config_table} ORDER BY id DESC LIMIT 1;")
+            r2_score_with_score = cursor.fetchone()[0]
+            cursor.close()
+            conn.close()
+            return float(r2_score_with_score) if r2_score_with_score else None
+        except Exception as e:
+            print(f"Error fetching r2_score_without_score: {str(e)}")
+            return None
+
     def post(self):
         try:
             model_pkl = open_model('linear_model_without_score.pkl', 'rb')
@@ -81,13 +108,12 @@ class WithoutScorePrediction(FlaskView):
         input_values = {}
         for feature in selected_features:
             if feature in request.form:
-                input_values[feature] = request.form[feature]
+                input_values[feature] = float(request.form[feature])
 
         try:
             if not bool(input_values):
                 final_features = previous_features_list
             else:
-                print("previous", previous_features_list)
                 input_data = [float(input_values[feature])
                               for feature in selected_features]
                 final_features = previous_features_list + input_data
