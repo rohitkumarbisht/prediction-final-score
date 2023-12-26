@@ -95,16 +95,16 @@ input[type="submit"]:hover {
   justify-content: space-between;
 }
 .form-group {
-  flex-basis: calc(50% - 22px); /* Adjust the width as needed */
+  flex-basis: calc(50% - 22px); 
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
 }
 .feature-label {
-  font-size: 12px; /* Adjust the font size as needed */
+  font-size: 12px; 
 }
 .small-input {
-  width: 20% !important; /* Adjust the input box width as needed */
+  width: 20% !important;
   padding: 5px !important;
 }
 h4 {
@@ -131,6 +131,26 @@ th {
 }
 
 a {
-  text-decoration: none; /* Remove the underline */
-  color: #333; /* Set your desired text color */
+  text-decoration: none;
+  color: #333;
+}
+
+button {
+  background-color: #3498db;
+  color: #fff; 
+  padding: 10px 20px;
+  font-size: 16px; 
+  border: none; 
+  border-radius: 5px;
+  cursor: pointer; 
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #2980b9; 
+}
+
+table {
+  width: 100%;
+  margin-top: 20px;
 }
