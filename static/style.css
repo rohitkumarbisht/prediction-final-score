@@ -149,7 +149,7 @@ a {
 }
 
 button {
-  background-color: #3498db;
+  background-color: #007bff;
   color: #fff; 
   padding: 10px 20px;
   font-size: 16px; 
@@ -160,10 +160,24 @@ button {
 }
 
 button:hover {
-  background-color: #2980b9; 
+  background-color: #0056b3; 
 }
 
 table {
   width: 100%;
   margin-top: 20px;
+}
+
+.fa{
+  color: #fff;
+}
+
+.report-body{
+  background-color: #fff;
+}
+
+.back-btn{
+  padding: 7px 30px 7px 30px;
+  margin: 5px 0px 0px 10px;
+  background-color: #007bff;
 }
