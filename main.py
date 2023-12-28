@@ -14,6 +14,7 @@ from app.routes.with_score_prediction import WithScorePrediction
 from app.routes.with_score_training import WithScoreTraining
 from app.routes.without_score_prediction import WithoutScorePrediction
 from app.routes.without_score_training import WithoutScoreTraining
+from app.routes.student_report import StudentReport
 
 app = Flask(__name__, template_folder='templates')
 api = Api(app)
@@ -43,6 +44,8 @@ EngagementPrediction.register(app, route_base='/score-pred')
 WithScorePrediction.register(app, route_base='/prediction-withscore')
 
 WithoutScorePrediction.register(app, route_base='/prediction-withoutscore')
+
+StudentReport.register(app, route_base='/student-report')
 
 
 if __name__ == '__main__':

@@ -7,10 +7,15 @@
         <title>Student Report</title>
         <link rel="stylesheet"
             href="{{url_for('static', filename='../static/style.css')}}">
+        <link rel="stylesheet" 
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+        </head>
     </head>
 
-    <body>
-
+    <body class="report-body">
+        <header>
+            <a href="/"><button class="back-btn" ><i class="fa fa-arrow-left"></i></button></a>
+        </header>
         <div id="predictionResult">
             <iframe title="powerbi_report" id="Iframe"
                 src="https://app.powerbi.com/reportEmbed?reportId=e005ea73-4088-4798-a173-62bd1a614d92&autoAuth=true&ctid=d7bdcc08-a599-45fe-bbec-f852ee1fd486&navContentPaneEnabled=false"></iframe>

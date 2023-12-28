@@ -57,7 +57,7 @@ class CorrelationWithoutScore(FlaskView):
                 self.generate_correlation_graph(
                     correlation_data, selected_column)
                 # Save the image
-                png_path = save_image("correlation_graph.png")
+                png_path = save_image("correlation_without_score_graph.png")
                 # find highly correlated columns
                 highly_correlated = self.find_highly_correlated_columns(
                     correlation_data)
@@ -76,7 +76,7 @@ class CorrelationWithoutScore(FlaskView):
                 save_file(selected_column, "target_column.txt", "w")
 
             if os.path.exists(png_path):
-                return render_template("correlation_graph.html", selected_column=selected_column, col_no=not_correlated, col_cor=highly_correlated)
+                return render_template("correlation_graph.html", selected_column=selected_column, col_no=not_correlated, col_cor=highly_correlated,graph_path = 'correlation_without_score_graph.png')
             else:
                 # 404 Not Found
                 return make_response({"error": "Correlation graph not found"}, 404)

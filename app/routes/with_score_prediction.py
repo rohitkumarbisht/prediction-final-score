@@ -2,13 +2,12 @@ import ast
 
 import pandas as pd
 import psycopg2
-from flask import make_response, render_template, request
+from flask import make_response, redirect, request, url_for
 from flask_classful import FlaskView
 
 import config
-from app.routes.engagement_prediction import (EngagementPrediction,
-                                              insert_data_called)
-from app.utils.file_open import open_model, read_file
+from app.routes.engagement_prediction import EngagementPrediction
+from app.utils.file_open import open_model
 
 
 class WithScorePrediction(FlaskView):
@@ -30,7 +29,6 @@ class WithScorePrediction(FlaskView):
         return new_df
 
     def insert_data_to_database(self, new_df, prediction):
-        global insert_data_called
         last_row_index = new_df.index[-1]
         target_column = ['predicted_final_exam_score']
         # # Update the last row's last column with the predicted value
@@ -47,24 +45,22 @@ class WithScorePrediction(FlaskView):
                 value_tuple += (value,)
             else:
                 value_tuple += (float(value),)
-        if insert_data_called == False:
-            try:
-                conn = psycopg2.connect(
-                    host=config.db_host,
-                    port=config.db_port,
-                    user=config.db_user,
-                    password=config.db_password,
-                    database=config.db_name
-                )
-                cursor = conn.cursor()
-                cursor.execute(insert_query, value_tuple)
-                conn.commit()
-                cursor.close()
-                conn.close()
-                insert_data_called = True
-            except Exception as e:
-                print(f"Error inserting data into PostgreSQL table: {str(e)}")
-                return "Error inserting data into PostgreSQL table", 500
+        try:
+            conn = psycopg2.connect(
+                host=config.db_host,
+                port=config.db_port,
+                user=config.db_user,
+                password=config.db_password,
+                database=config.db_name
+            )
+            cursor = conn.cursor()
+            cursor.execute(insert_query, value_tuple)
+            conn.commit()
+            cursor.close()
+            conn.close()
+        except Exception as e:
+            print(f"Error inserting data into PostgreSQL table: {str(e)}")
+            return "Error inserting data into PostgreSQL table", 500
         return "Successfully updated database"
 
     def fetch_r2_score_with_score(self):
@@ -113,6 +109,6 @@ class WithScorePrediction(FlaskView):
             if prediction[0] < 0:
                 prediction[0] = 0
             self.insert_data_to_database(new_df, prediction)
-            return render_template('final_result.html')
+            return redirect(url_for('StudentReport:get'))
         except Exception as e:
             return f"{str(e)}", 500

@@ -4,8 +4,6 @@ from flask_classful import FlaskView
 import config
 from app.utils.file_open import open_model, read_file
 
-insert_data_called = False
-
 
 class EngagementPrediction(FlaskView):
     _instance = None
