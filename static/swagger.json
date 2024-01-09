@@ -26,12 +26,12 @@
     }
   ],
   "paths": {
-    "/distribution-graph": {
+    "/distribution-graph/": {
       "get": {
         "tags": [
           "Graph Generation"
         ],
-        "summary": "Get distribution graph",
+        "summary": "Graphs image will be created and path for image is returned",
         "responses": {
           "200": {
             "description": "OK Success",
@@ -89,7 +89,7 @@
         "tags": [
           "Graph Generation"
         ],
-        "summary": "Get correlation graph",
+        "summary": "Graphs image showing correlation with columns will be created, correlated columns and path for image is returned",
         "parameters": [
           {
             "name": "selected_column",
@@ -165,7 +165,7 @@
         "tags": [
           "Graph Generation"
         ],
-        "summary": "Get correlation graph",
+        "summary": "Graphs image showing correlation with final score of all columns will be created, correlated columns and path for image is returned",
         "parameters": [
           {
             "name": "selected_column",
@@ -241,7 +241,7 @@
         "tags": [
           "Graph Generation"
         ],
-        "summary": "Get correlation graph",
+        "summary": "Graphs image showing correlation with final score of all the columns except the other scores will be created, correlated columns and path for image is returned",
         "parameters": [
           {
             "name": "selected_column",
@@ -317,7 +317,7 @@
         "tags": [
           "Train Model"
         ],
-        "summary": "Get training parameters",
+        "summary": "return all the parameters achieved after training the model with engagement level as target",
         "responses": {
           "200": {
             "description": "OK Success",
@@ -375,7 +375,7 @@
         "tags": [
           "Train Model"
         ],
-        "summary": "Get training parameters",
+        "summary": "return all the parameters achieved after training the model with final score as target and all other columns as independent variables",
         "responses": {
           "200": {
             "description": "OK Success",
@@ -436,7 +436,7 @@
         "tags": [
           "Train Model"
         ],
-        "summary": "Get training parameters",
+        "summary": "return all the parameters achieved after training the model with final score as target and all other columns as independent variables except the scores columns",
         "responses": {
           "200": {
             "description": "OK Success",
@@ -497,7 +497,7 @@
         "tags": [
           "Prediction"
         ],
-        "summary": "Predict on the trained model and update the result in the database for multiple record",
+        "summary": " Predict the engagement level on the trained model",
         "requestBody": {
           "required": true,
           "content": {
@@ -514,38 +514,38 @@
                   "No_of_Logins": {
                     "type": "integer"
                   },
+                  "Assignment1_delay": {
+                    "type": "integer"
+                  },
                   "Assignment2_delay": {
                     "type": "integer"
                   },
                   "Assignment3_delay": {
                     "type": "integer"
                   },
-                  "Assignment1_delay": {
-                    "type": "integer"
-                  },
-                  "Assignment3_submit": {
-                    "type": "integer"
+                  "Assignment1_submit": {
+                    "type": "number"
                   },
                   "Assignment2_submit": {
-                    "type": "integer"
+                    "type": "number"
                   },
-                  "Assignment1_submit": {
-                    "type": "integer"
+                  "Assignment3_submit": {
+                    "type": "number"
                   },
                   "Average_time_to_submit_assignment": {
-                    "type": "integer"
+                    "type": "number"
                   }
                 },
                 "required": [
                   "features",
                   "ContentReads",
                   "No_of_Logins",
+                  "Assignment1_delay",
                   "Assignment2_delay",
                   "Assignment3_delay",
-                  "Assignment1_delay",
-                  "Assignment3_submit",
-                  "Assignment2_submit",
                   "Assignment1_submit",
+                  "Assignment2_submit",
+                  "Assignment3_submit",
                   "Average_time_to_submit_assignment"
                 ]
               }
@@ -627,7 +627,7 @@
         "tags": [
           "Prediction"
         ],
-        "summary": "Predict on the trained model and update the result in the database for multiple record",
+        "summary": "Predict the final score on the trained model using all the score columns, and saving the result to database",
         "requestBody": {
           "required": true,
           "content": {
@@ -644,22 +644,32 @@
                       "type": "number"
                     }
                   },
-                  "Midterm_exam_score": {
-                    "type": "integer"
-                  },
-                  "assignment3_score": {
+                  "assignment1_score": {
                     "type": "integer"
                   },
                   "assignment2_score": {
                     "type": "integer"
                   },
-                  "assignment1_score": {
+                  "assignment3_score": {
                     "type": "integer"
                   },
                   "quiz1_score": {
                     "type": "integer"
+                  },
+                  "Midterm_exam_score": {
+                    "type": "integer"
                   }
-                }
+                },
+                "required":[
+                  "features_with_score",
+                  "pred_value",
+                  "assignment1_score",
+                  "assignment2_score",
+                  "assignment3_score",
+                  "quiz1_score",
+                  "Midterm_exam_score"
+
+                ]
               }
             }
           }
@@ -724,7 +734,7 @@
         "tags": [
           "Prediction"
         ],
-        "summary": "Predict on the trained model and update the result in the database for multiple record",
+        "summary": "Predict the final score on the trained model without using the score columns, and saving the result to database",
         "requestBody": {
           "required": true,
           "content": {
@@ -741,7 +751,10 @@
                       "type": "number"
                     }
                   }
-                }
+                },
+                "required":[
+                  "pred_value"
+                ]
               }
             }
           }
