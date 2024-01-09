@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Student Final Score Prediction</title>
+        <link rel="stylesheet"
+            href="{{url_for('static', filename='../static/style.css')}}" />
+    </head>
+
+    <body>
+        <h3>
+            Please enter below required fields for student final score
+            prediction
+        </h3>
+        <h4>
+            Student engagement level is: {% if engagement == 0 %} Low {% elif
+            engagement == 1 %} Moderate {% elif engagement == 2 %} High {% else
+            %} Unknown {% endif %}
+        </h4>
+
+        <select id="predictionType" name="predictionType" class="medium-input">
+            <option value="with_score">With Score Prediction</option>
+            <option value="without_score">Without Score Prediction</option>
+        </select>
+
+        <form id="withScoreFields" action="/prediction-withscore" method="post">
+            <input type="hidden" name="features_with_score"
+                value="{{ with_score|join(',') }}" />
+            <input type="hidden" name="pred_value"
+                value="{{ pred_value|join(',') }}" />
+            <div class="form-container">
+                {% for feature in with_score %}
+                {% if feature != "Engagement_Level" %}
+                <div class="form-group">
+                    <label for="{{ feature }}" class="feature-label">
+                        {% for field_name, label in fields %}
+                        {% if feature == field_name %}
+                        {{ label }} <!-- label that will display -->
+                        {% endif %}
+                        {% endfor %}:
+                    </label>
+                    <input type="number" id="{{ feature }}_with_score"
+                        name="{{ feature }}" placeholder class="small-input" />
+                </div>
+                <script>
+                var inputElement = document.getElementById("{{ feature }}_with_score");
+                var min = {% if engagement == 0 %} 0 {% elif engagement == 1 %} 60 {% elif engagement == 2 %} 90 {% endif %};
+                var max = {% if engagement == 0 %} 50 {% elif engagement == 1 %} 80 {% elif engagement == 2 %} 100 {% endif %};
+                var randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
+                inputElement.value = randomValue;
+            </script>
+                {% endif %}
+                {% endfor %}
+            </div>
+            <input type="submit" value="View Prediction Report" />
+        </form>
+
+        <form id="withoutScoreFields" action="/prediction-withoutscore"
+            method="post" style="display: none;">
+            <input type="hidden" name="features_without_score"
+                value="{{ without_score|join(',') }}" />
+            <input type="hidden" name="pred_value"
+                value="{{ pred_value|join(',') }}" />
+            <div class="form-container">
+                {% for feature in without_score %}
+                {% if feature != "Engagement_Level" %}
+                <div class="form-group">
+                    <label for="{{ feature }}" class="feature-label">
+                        {% for field_name, label in fields %}
+                        {% if feature == field_name %}
+                        {{ label }} <!-- label that will display -->
+                        {% endif %}
+                        {% endfor %}:
+                    </label>
+                    <input type="number" id="{{ feature }}_without_score"
+                        name="{{ feature }}" placeholder class="small-input" />
+                </div>
+
+                <script>
+                var inputElement = document.getElementById("{{ feature }}_without_score");
+                var min = {% if engagement == 0 %} 0 {% elif engagement == 1 %} 60 {% elif engagement == 2 %} 90 {% endif %};
+                var max = {% if engagement == 0 %} 50 {% elif engagement == 1 %} 80 {% elif engagement == 2 %} 100 {% endif %};
+                var randomValue = Math.floor(Math.random() * (max - min + 1)) + min;
+                inputElement.value = randomValue;
+            </script>
+
+                {% endif %}
+                {% endfor %}
+            </div>
+
+            <input type="submit" value="View Prediction Report" />
+        </form>
+
+        <script>
+        document.getElementById('predictionType').addEventListener('change', function () {
+            var selectedValue = this.value;
+            
+            // Hide/show relevant form containers based on the selected option
+            if (selectedValue === 'with_score') {
+                document.getElementById('withScoreFields').style.display = 'block';
+                document.getElementById('withoutScoreFields').style.display = 'none';
+            } else if (selectedValue === 'without_score') {
+                document.getElementById('withScoreFields').style.display = 'none';
+                document.getElementById('withoutScoreFields').style.display = 'block';
+            }
+        });
+    </script>
+    </body>
+
+</html>

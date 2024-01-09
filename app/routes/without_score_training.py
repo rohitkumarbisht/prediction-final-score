@@ -119,7 +119,9 @@ class WithoutScoreTraining(FlaskView):
         # Save the model to file
         open_model('linear_model_without_score.pkl', 'wb', linear_model)
         predict = check_file_exists()
-        result = self.save_training_results_to_database(r2, training_time, modified_on)
+        self.save_training_results_to_database(r2, training_time, modified_on)
+        result = self.save_training_results_to_text(
+            r2, mse, mae, training_time, modified_on)
         if result:
             return result
 

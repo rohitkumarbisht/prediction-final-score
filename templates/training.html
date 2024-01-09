@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title> Training Success </title>
+        <link rel="stylesheet"
+            href="{{url_for('static', filename='../static/training.css')}}">
+    </head>
+    <body>
+        <h2>Training Completed Successfully</h2>
+        {% if accuracy %}
+        <div class="training-data">
+            <h3>Training result:</h3>
+            <p><strong>Accuracy:</strong> {{accuracy}}</p>
+            <p><strong>Precision:</strong> {{precision}}</p>
+            <p><strong>Training Time:</strong> {{training_time}}</p>
+            <p><strong>Latest Training Date:</strong> {{date_modified}}</p>
+        </div>
+        {% elif r2 %}
+        <div class="training-data">
+            <h3>Training result:</h3>
+            <p><strong>R-Squared Score:</strong> {{r2}}</p>
+            <p><strong>Mean Sqaured Eror:</strong> {{mse}}</p>
+            <p><strong>Mean Absolute Eror:</strong> {{mae}}</p>
+            <p><strong>Training Time:</strong> {{training_time}}</p>
+            <p><strong>Latest Training Date:</strong> {{date_modified}}</p>
+        </div>
+        {% endif %}
+        <div>
+            {% if predict == false %}
+            <button class="train-btn"
+                onclick="changePath('/distribution-graph')">Train Other Models</button>
+            {% else %}
+            <button class="train-btn" onclick="changePath('/eng-form')">Start
+                Prediction</button>
+            {% endif %}
+        </div>
+
+        <script>
+        function changePath(newPath) {
+            window.location.href = newPath;
+        }
+    </script>
+    </body>
+</html>
