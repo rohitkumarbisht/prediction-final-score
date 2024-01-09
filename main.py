@@ -1,6 +1,7 @@
 from flask import Flask
 from flask_restful import Api
 
+import swagger_config as sw
 from app.routes.correlation_with_eng_level import \
     CorrelationWithEngagementLevel
 from app.routes.correlation_with_score import CorrelationWithScore
@@ -10,14 +11,16 @@ from app.routes.engagement_form_data import EngagementPredictionForm
 from app.routes.engagement_prediction import EngagementPrediction
 from app.routes.engagement_training import EngagementTraining
 from app.routes.home import Home
+from app.routes.student_report import StudentReport
 from app.routes.with_score_prediction import WithScorePrediction
 from app.routes.with_score_training import WithScoreTraining
 from app.routes.without_score_prediction import WithoutScorePrediction
 from app.routes.without_score_training import WithoutScoreTraining
-from app.routes.student_report import StudentReport
 
 app = Flask(__name__, template_folder='templates')
 api = Api(app)
+
+app.register_blueprint(sw.SWAGGER_BLUEPRINT, specs_url=sw.SWAGGER_URL)
 
 Home.register(app, route_base='/')
 
@@ -39,7 +42,7 @@ WithoutScoreTraining.register(app, route_base='/training/without-score/')
 
 EngagementPredictionForm.register(app, route_base='/eng-form')
 
-EngagementPrediction.register(app, route_base='/score-pred')
+EngagementPrediction.register(app, route_base='/prediction-eng')
 
 WithScorePrediction.register(app, route_base='/prediction-withscore')
 

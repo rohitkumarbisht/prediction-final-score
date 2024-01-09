@@ -4,7 +4,7 @@ from datetime import date
 
 import numpy as np
 import psycopg2
-from flask import Response, make_response, render_template
+from flask import Response, make_response
 from flask_classful import FlaskView
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
@@ -124,4 +124,5 @@ class WithScoreTraining(FlaskView):
         if result:
             return result
 
-        return render_template("training.html", predict=predict, r2=r2, mse=mse, mae=mae, training_time=training_time, date_modified=modified_on)
+        # return render_template("training.html", predict=predict, r2=r2, mse=mse, mae=mae, training_time=training_time, date_modified=modified_on)
+        return make_response({"message": "model trained sucessfully", "r2_score": r2, "mean_absolute_error": mae, "mean_squared_error": mse, "training_time": training_time, "date_modified": modified_on}, 200)

@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import pandas as pd
 import psycopg2
-from flask import render_template
+from flask import make_response
 from flask_classful import FlaskView
 
 import config
@@ -100,7 +100,8 @@ class DistributionGraph(FlaskView):
                 self.generate_distribution_graph(csv_df)
                 png_path = save_image('distribution.png')
                 if os.path.exists(png_path):
-                    return render_template('distribution_graph.html', columns=list(csv_df.columns), fields=config.fields)
+                    return make_response({"message": "Distribution graph generated", "png_path": png_path}, 200)
+                    # return render_template('distribution_graph.html', columns=list(csv_df.columns), fields=config.fields)
                 else:
                     return ({"error": "Distribution graph not found"}, 404)
         except Exception as e:
