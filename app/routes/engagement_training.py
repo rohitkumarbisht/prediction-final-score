@@ -110,9 +110,7 @@ class EngagementTraining(FlaskView):
         open_model('xgb_model_engagement.pkl', 'wb', XGB_Model)
         predict = check_file_exists()
         # save training results to text file
-        self.save_training_results_to_database(
-            accuracy, precision, training_time, modified_on)
-        result = self.save_training_results_to_text(
+        result = self.save_training_results_to_database(
             accuracy, precision, training_time, modified_on)
         if result:
             return result
