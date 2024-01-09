@@ -7,7 +7,6 @@ from flask import make_response
 from flask_classful import FlaskView
 
 import config
-from app.routes.upload_csv import UploadCSV
 from app.utils.file_open import save_image
 
 
@@ -19,16 +18,6 @@ class DistributionGraph(FlaskView):
             cls._instance = super(DistributionGraph, cls).__new__(cls)
             cls._instance.csv_data = None
         return cls._instance
-
-    def fetch_csv_data(self):
-        upload_csv_instance = UploadCSV()
-        uploaded_data = upload_csv_instance.fetch_data()
-        if uploaded_data is None:
-            self.csv_data = self.fetch_data_from_postgresql()
-        else:
-            self.csv_data = uploaded_data
-        return self.csv_data
-
     # connect with the PostgreSQL Server
     def fetch_data_from_postgresql(self):
         try:
@@ -90,7 +79,7 @@ class DistributionGraph(FlaskView):
             return e
 
     def get(self):
-        csv_df = self.fetch_csv_data()
+        csv_df = self.fetch_data_from_postgresql()
         try:
             if csv_df is None:
                 # 403 Forbidden
