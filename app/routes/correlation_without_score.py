@@ -1,7 +1,7 @@
 import os
 
 import matplotlib.pyplot as plt
-from flask import make_response, render_template, request
+from flask import make_response, request
 from flask_classful import FlaskView
 
 from app.routes.distribution_graph import DistributionGraph
@@ -76,7 +76,8 @@ class CorrelationWithoutScore(FlaskView):
                 save_file(selected_column, "target_column.txt", "w")
 
             if os.path.exists(png_path):
-                return render_template("correlation_graph.html", selected_column=selected_column, col_no=not_correlated, col_cor=highly_correlated,graph_path = 'correlation_without_score_graph.png')
+                # return render_template("correlation_graph.html", selected_column=selected_column, col_no=not_correlated, col_cor=highly_correlated,graph_path = 'correlation_without_score_graph.png')
+                return make_response({"correlated_columns": highly_correlated, "message": "Correlation graph generated", "png_path": png_path}, 200)
             else:
                 # 404 Not Found
                 return make_response({"error": "Correlation graph not found"}, 404)

@@ -3,7 +3,7 @@ import time
 from datetime import date
 
 import psycopg2
-from flask import Response, make_response, render_template
+from flask import Response, make_response
 from flask_classful import FlaskView
 from sklearn.model_selection import StratifiedKFold, cross_val_score
 from xgboost import XGBClassifier
@@ -117,4 +117,5 @@ class EngagementTraining(FlaskView):
         if result:
             return result
 
-        return render_template("training.html", predict=predict, accuracy=accuracy, precision=precision, training_time=training_time, date_modified=modified_on)
+        # return render_template("training.html", predict=predict, accuracy=accuracy, precision=precision, training_time=training_time, date_modified=modified_on)
+        return make_response({"message": "model trained sucessfully", "accuracy": accuracy, "precision": precision, "date_modified": modified_on, "training_time": training_time}, 200)

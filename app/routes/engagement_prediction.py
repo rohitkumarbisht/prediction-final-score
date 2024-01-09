@@ -1,7 +1,6 @@
-from flask import make_response, render_template, request
+from flask import make_response, request
 from flask_classful import FlaskView
 
-import config
 from app.utils.file_open import open_model, read_file
 
 
@@ -73,5 +72,6 @@ class EngagementPrediction(FlaskView):
         # Predict using the model
         if len(pred_engagement) == 0:
             return make_response({"error": "Prediction failed as data can't be processed"}, 422)
-
-        return render_template('student_final_score_pred.html', engagement=pred_engagement[0], with_score=with_score, without_score=without_score, fields=config.fields, pred_value=[input_data])
+        predicted_eng_val = int(pred_engagement[0])
+        # return render_template('student_final_score_pred.html', engagement=pred_engagement[0], with_score=with_score, without_score=without_score, fields=config.fields, pred_value=[input_data])
+        return make_response({"message": "engagement level predicted", "predicted_engagement": predicted_eng_val, 'with_score': with_score, "without_score": without_score, "features": input_data}, 200)

@@ -2,7 +2,7 @@ import ast
 
 import pandas as pd
 import psycopg2
-from flask import make_response, redirect, request, url_for
+from flask import make_response, request
 from flask_classful import FlaskView
 
 import config
@@ -26,7 +26,7 @@ class WithScorePrediction(FlaskView):
             new_row[feature] = [value]
         combined_row = {**new_row_pred, **new_row}
         new_df = pd.DataFrame(combined_row)
-        return new_df
+        return new_df, label
 
     def insert_data_to_database(self, new_df, prediction):
         last_row_index = new_df.index[-1]
@@ -101,14 +101,15 @@ class WithScorePrediction(FlaskView):
             if feature in request.form:
                 input_values[feature] = float(request.form[feature])
         try:
-            new_df = self.update_csv(input_values)
+            new_df, label = self.update_csv(input_values)
             input_data = [float(input_values[feature])
                           for feature in selected_features]
             final_features = previous_features_list + input_data
             prediction = model_pkl.predict([final_features])
             if prediction[0] < 0:
                 prediction[0] = 0
-            self.insert_data_to_database(new_df, prediction)
-            return redirect(url_for('StudentReport:get'))
+            message = self.insert_data_to_database(new_df, prediction)
+            # return redirect(url_for('StudentReport:get'))
+            return make_response({"message": message, "predicted_score": prediction[0][0], "report_url": "https://app.powerbi.com/reportEmbed?reportId=e005ea73-4088-4798-a173-62bd1a614d92&autoAuth=true&ctid=d7bdcc08-a599-45fe-bbec-f852ee1fd486&navContentPaneEnabled=false", "prediction_confidence": label}, 200)
         except Exception as e:
             return f"{str(e)}", 500

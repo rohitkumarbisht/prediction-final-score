@@ -10,7 +10,8 @@
     </head>
 
     <body>
-        <h3>Please enter below required fields for student engagement prediction</h3>
+        <h3>Please enter below required fields for student engagement
+            prediction</h3>
         <h4>Predict student engagement level</h4>
         <div class="dropdown">
             <label for="engagement_level" class="feature-label">Select:</label>
@@ -20,7 +21,7 @@
                 <option value="high">High</option>
             </select>
         </div>
-        <form action="/score-pred" method="post" id="prediction-form">
+        <form action="/prediction-eng" method="post" id="prediction-form">
             <input type="hidden" name="features"
                 value="{{ selected_features|join(',') }}">
             <div class="form-container">
