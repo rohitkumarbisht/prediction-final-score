@@ -1,0 +1,805 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Final Score Prediction API",
+    "description": "Api to predict Engagement Level & Final Score",
+    "version": "1.0"
+  },
+  "tags": [
+    {
+      "name": "Graph Generation",
+      "description": "Generation of different graphs"
+    },
+    {
+      "name": "Train Model",
+      "description": "Train the Model using Uploaded Datasets"
+    },
+    {
+      "name": "Prediction",
+      "description": "Predict the values using trained model"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://127.0.0.1:5005/",
+      "description": "Local Development Environment"
+    }
+  ],
+  "paths": {
+    "/distribution-graph": {
+      "get": {
+        "tags": [
+          "Graph Generation"
+        ],
+        "summary": "Get distribution graph",
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "png_path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No data available"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Distribution graph not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Error fetching data from PostgreSQL: error description"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/correlation-graph/for-engagement-level/": {
+      "get": {
+        "tags": [
+          "Graph Generation"
+        ],
+        "summary": "Get correlation graph",
+        "parameters": [
+          {
+            "name": "selected_column",
+            "in": "query",
+            "description": "The selected target column for correlation",
+            "required": true,
+            "value": "Engagement_Level",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlated_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "png_path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Correlation graph not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "An error occurred: error description"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No target column was selected"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/correlation-graph/with-score/": {
+      "get": {
+        "tags": [
+          "Graph Generation"
+        ],
+        "summary": "Get correlation graph",
+        "parameters": [
+          {
+            "name": "selected_column",
+            "in": "query",
+            "description": "The selected target column for correlation",
+            "required": true,
+            "value": "final_exam_score",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlated_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "png_path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Correlation graph not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "An error occurred: error description"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No target column was selected"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/correlation-graph/without-score/": {
+      "get": {
+        "tags": [
+          "Graph Generation"
+        ],
+        "summary": "Get correlation graph",
+        "parameters": [
+          {
+            "name": "selected_column",
+            "in": "query",
+            "description": "The selected target column for correlation",
+            "required": true,
+            "value": "final_exam_score",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "correlated_columns": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "png_path": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Correlation graph not found"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "An error occurred: error description"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No target column was selected"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/training/for-engagement-level/": {
+      "get": {
+        "tags": [
+          "Train Model"
+        ],
+        "summary": "Get training parameters",
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accuracy": {
+                      "type": "number"
+                    },
+                    "date_modified": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "precision": {
+                      "type": "number"
+                    },
+                    "training_time": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "File not found:{file_name}"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Failed to save training results to the database: {describe error}"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/training/with-score/": {
+      "get": {
+        "tags": [
+          "Train Model"
+        ],
+        "summary": "Get training parameters",
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "r2_score": {
+                      "type": "number"
+                    },
+                    "date_modified": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "mean_absolute_error": {
+                      "type": "number"
+                    },
+                    "mean_squared_error": {
+                      "type": "number"
+                    },
+                    "training_time": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "File not found:{file_name}"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Failed to save training results to the database: {describe error}"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/training/without-score/": {
+      "get": {
+        "tags": [
+          "Train Model"
+        ],
+        "summary": "Get training parameters",
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "r2_score": {
+                      "type": "number"
+                    },
+                    "date_modified": {
+                      "type": "string",
+                      "format": "date"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "mean_absolute_error": {
+                      "type": "number"
+                    },
+                    "mean_squared_error": {
+                      "type": "number"
+                    },
+                    "training_time": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "File not found:{file_name}"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Failed to save training results to the database: {describe error}"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/prediction-eng/": {
+      "post": {
+        "tags": [
+          "Prediction"
+        ],
+        "summary": "Predict on the trained model and update the result in the database for multiple record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "features": {
+                    "type": "string"
+                  },
+                  "ContentReads": {
+                    "type": "integer"
+                  },
+                  "No_of_Logins": {
+                    "type": "integer"
+                  },
+                  "Assignment2_delay": {
+                    "type": "integer"
+                  },
+                  "Assignment3_delay": {
+                    "type": "integer"
+                  },
+                  "Assignment1_delay": {
+                    "type": "integer"
+                  },
+                  "Assignment3_submit": {
+                    "type": "integer"
+                  },
+                  "Assignment2_submit": {
+                    "type": "integer"
+                  },
+                  "Assignment1_submit": {
+                    "type": "integer"
+                  },
+                  "Average_time_to_submit_assignment": {
+                    "type": "integer"
+                  }
+                },
+                "required": [
+                  "features",
+                  "ContentReads",
+                  "No_of_Logins",
+                  "Assignment2_delay",
+                  "Assignment3_delay",
+                  "Assignment1_delay",
+                  "Assignment3_submit",
+                  "Assignment2_submit",
+                  "Assignment1_submit",
+                  "Average_time_to_submit_assignment"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "predicted_engagement": {
+                      "type": "integer"
+                    },
+                    "with_score": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "without_score": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "features": {
+                      "type": "array",
+                      "items": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Model file not found, Please train the model!"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No input data provided in the request body."
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Prediction failed as data can't be processed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/prediction-withscore/": {
+      "post": {
+        "tags": [
+          "Prediction"
+        ],
+        "summary": "Predict on the trained model and update the result in the database for multiple record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "features_with_score": {
+                    "type": "string"
+                  },
+                  "pred_value": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "Midterm_exam_score": {
+                    "type": "integer"
+                  },
+                  "assignment3_score": {
+                    "type": "integer"
+                  },
+                  "assignment2_score": {
+                    "type": "integer"
+                  },
+                  "assignment1_score": {
+                    "type": "integer"
+                  },
+                  "quiz1_score": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "predicted_score": {
+                      "type": "number"
+                    },
+                    "report_url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Model file not found, Please train the model!"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No input data provided in the request body"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Prediction failed as data can't be processed"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/prediction-withoutscore/": {
+      "post": {
+        "tags": [
+          "Prediction"
+        ],
+        "summary": "Predict on the trained model and update the result in the database for multiple record",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "features_with_score": {
+                    "type": "string"
+                  },
+                  "pred_value": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string"
+                    },
+                    "predicted_score": {
+                      "type": "number"
+                    },
+                    "report_url": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Model file not found, Please train the model!"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "No input data provided in the request body"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "content": {
+              "application/json": {
+                "example": {
+                  "error": "Prediction failed as data can't be processed"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
