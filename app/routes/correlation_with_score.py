@@ -11,7 +11,7 @@ from app.utils.file_open import read_file, save_file, save_image
 class CorrelationWithScore(FlaskView):
     def calculate_correlation(self, selected_column):
         csv_data_instance = DistributionGraph()
-        csv_data = csv_data_instance.fetch_csv_data()
+        csv_data = csv_data_instance.fetch_data_from_postgresql()
         csv_data.drop(columns='Engagement_Level', inplace=True)
         # Perform correlation calculation
         correlation_with_Target = csv_data.corr()[selected_column]
