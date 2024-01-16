@@ -93,7 +93,7 @@ class WithoutScoreTraining(FlaskView):
 
     def get(self):
         csv_data_instance = DistributionGraph()
-        csv_data = csv_data_instance.fetch_csv_data()
+        csv_data = csv_data_instance.fetch_data_from_postgresql()
         actual_columns = read_file(
             "highly_correlated_columns_without_score.txt", "r")
         if isinstance(actual_columns, Response):
