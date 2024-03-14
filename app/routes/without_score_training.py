@@ -1,14 +1,13 @@
 import contextlib
 import time
 from datetime import date
-
+from xgboost import XGBRegressor
 import numpy as np
 import psycopg2
 from flask import Response, make_response
 from flask_classful import FlaskView
-from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import StratifiedKFold, cross_validate
-
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 import config
 from app.routes.distribution_graph import DistributionGraph
 from app.utils.file_open import (check_file_exists, open_model, read_file,
@@ -25,20 +24,37 @@ class WithoutScoreTraining(FlaskView):
             return make_response({"error": f"File not found: {e.filename}"}, 404)
 
     def train_model(self, X, y):
-        linear_model = LinearRegression()
-        linear_model.fit(X, y)
-        return linear_model
+        # XGBRegressor Hyperparameters:
+        param_grid = {
+            'n_estimators': [100, 200, 300],  # Number of boosting rounds (trees) to be run.
+            'learning_rate': [0.01, 0.1, 0.2], # Step size shrinkage to prevent overfitting.
+            'max_depth': [3, 4, 5], # Maximum depth of a tree.
+        }
+        
+        base_model = XGBRegressor()
+
+        # Use RandomizedSearchCV to find the best hyperparameters
+        grid_search = RandomizedSearchCV(base_model, param_grid, scoring='r2', cv=5,n_jobs=-1)
+        grid_search.fit(X, y)
+
+        # Get the best model with tuned hyperparameters
+        best_model = grid_search.best_estimator_
+
+        return best_model
+
 
     def evaluation_metrics_cal(self, model, X, y):
-        scores = cross_validate(model, X, y, cv=3, scoring=(
-            'r2', 'neg_mean_squared_error', 'neg_mean_absolute_error'), return_train_score=True)
-        r2_arr = scores['train_r2']
-        mse_arr = -scores['test_neg_mean_squared_error']
-        mae_arr = -scores['test_neg_mean_absolute_error']
-        r2_score = int((r2_arr[1]) * 100) / 100.0
-        mse = np.mean(mse_arr)
-        mae = np.mean(mae_arr)
-        return r2_score, mse, mae
+        scoring = ['r2', 'neg_mean_squared_error', 'neg_mean_absolute_error']
+
+        # Perform cross-validation
+        scores = cross_validate(model, X, y, cv=3, scoring=scoring, return_train_score=True)
+
+        # Calculate average scores
+        r2_avg = np.mean(scores['train_r2'])
+        mse_avg = -np.mean(scores['test_neg_mean_squared_error'])
+        mae_avg = -np.mean(scores['test_neg_mean_absolute_error'])
+
+        return r2_avg, mse_avg, mae_avg
 
     def save_training_results_to_database(self, r2, training_time, date_modified):
         try:
@@ -108,16 +124,16 @@ class WithoutScoreTraining(FlaskView):
         # Start measuring the training time
         start_time = time.time()
         #  Train the Neural Network model
-        linear_model = self.train_model(X, y)
+        reg_model = self.train_model(X, y)
         end_time = time.time()
         # Calculate the training time
         training_time = end_time - start_time
         # calculate accuracy, precision & modified_on
-        r2, mse, mae = self.evaluation_metrics_cal(linear_model, X, y)
+        r2, mse, mae = self.evaluation_metrics_cal(reg_model, X, y)
         today = date.today()
         modified_on = today.isoformat()
         # Save the model to file
-        open_model('linear_model_without_score.pkl', 'wb', linear_model)
+        open_model('reg_model_without_score.pkl', 'wb', reg_model)
         predict = check_file_exists()
         result = self.save_training_results_to_database(r2, training_time, modified_on)
         if result:

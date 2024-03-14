@@ -85,7 +85,7 @@ class WithScorePrediction(FlaskView):
 
     def post(self):
         try:
-            model_pkl = open_model('linear_model_with_score.pkl', 'rb')
+            model_pkl = open_model('reg_model_with_score.pkl', 'rb')
         except FileNotFoundError:
             return {'error': 'Model file not found, Please train the model!'}
 
