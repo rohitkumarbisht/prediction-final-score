@@ -1,12 +1,12 @@
 # Define your PostgreSQL database connection settings
-db_host = 'airbyte.cqqg4q5hnscs.ap-south-1.rds.amazonaws.com'
-db_port = 5432
-db_user = 'airbyte'
-db_password = 'F648d&lTHltriVidRa0R'
-db_name = 'learninganalytics'
-schema_name = 'learninganalytics'
-table_name = "student_data"
-model_config_table = "academic_model_config"
+db_host = 'db_host'
+db_port = 0000
+db_user = 'db_user'
+db_password = 'db_password'
+db_name = 'db_name'
+schema_name = 'schema_name'
+table_name = "table_name"
+model_config_table = "model_config_table"
 
 fields = [
     ('Student_ID', 'Student id'), ('No_of_Logins', 'No. of logins'), ('ContentReads',
